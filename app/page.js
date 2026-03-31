@@ -425,8 +425,8 @@ function BCard({title,children,accent=IND,compact}){
 function BField({label,children}){
   return<div style={{marginBottom:16}}><label style={{display:"block",fontSize:11,fontWeight:600,color:G500,marginBottom:6,letterSpacing:0.3}}>{label}</label>{children}</div>;
 }
+const inp={width:"100%",padding:"8px 12px",borderRadius:7,border:`1px solid ${G200}`,fontSize:13,color:G900,background:WH,outline:"none",boxSizing:"border-box",fontFamily:"inherit",direction:"rtl"};
+
 function BSel({value,onChange,options,placeholder}){
   return<select value={value} onChange={e=>onChange(e.target.value)} style={inp}>{placeholder&&<option value="">{placeholder}</option>}{options.map(o=><option key={o} value={o}>{o}</option>)}</select>;
 }
-
-const inp={width:"100%",padding:"8px 12px",borderRadius:7,border:`1px solid ${G200}`,fontSize:13,color:G900,background:WH,outline:"none",boxSizing:"border-box",fontFamily:"inherit",direction:"rtl"};
