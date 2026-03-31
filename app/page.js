@@ -217,20 +217,46 @@ function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
     if(!lastTaskText||wordLoading) return;
     setWordLoading(true);
     try{
-      const res=await fetch("/api/generate",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          messages:[{role:"user",content:"החזר את המטלה הבאה כפי שהיא, ללא שינויים:\n\n"+lastTaskText}],
-          system:systemPrompt,
-          generateWord:true
-        })
+      const [{Document,Packer,Paragraph,TextRun,HeadingLevel,AlignmentType},JSZipModule]=await Promise.all([
+        import("https://esm.sh/docx@8.5.0"),
+        import("https://esm.sh/jszip@3.10.1"),
+      ]);
+      const JSZip=JSZipModule.default||JSZipModule;
+      const lines=lastTaskText.split("\n");
+      const children=[];
+      for(const line of lines){
+        const t=line.trim();
+        if(!t){children.push(new Paragraph({children:[new TextRun({text:"",font:"Arial",rtl:true})],bidirectional:true,spacing:{before:40,after:40}}));continue;}
+        if(t.startsWith("# "))children.push(new Paragraph({heading:HeadingLevel.HEADING_1,children:[new TextRun({text:t.slice(2),font:"Arial",bold:true,size:36,color:"1A237E",rtl:true})],alignment:AlignmentType.RIGHT,bidirectional:true,spacing:{before:280,after:160}}));
+        else if(t.startsWith("## "))children.push(new Paragraph({heading:HeadingLevel.HEADING_2,children:[new TextRun({text:t.slice(3),font:"Arial",bold:true,size:28,color:"1565C0",rtl:true})],alignment:AlignmentType.RIGHT,bidirectional:true,spacing:{before:220,after:120}}));
+        else if(t.startsWith("### "))children.push(new Paragraph({heading:HeadingLevel.HEADING_3,children:[new TextRun({text:t.slice(4),font:"Arial",bold:true,size:26,color:"283593",rtl:true})],alignment:AlignmentType.RIGHT,bidirectional:true,spacing:{before:180,after:80}}));
+        else if(t.startsWith("- ")||t.startsWith("• "))children.push(new Paragraph({children:[new TextRun({text:"• "+t.slice(2),font:"Arial",size:24,rtl:true})],alignment:AlignmentType.RIGHT,bidirectional:true,indent:{right:400},spacing:{before:60,after:60}}));
+        else{
+          const parts=t.split(/(\*\*[^*]+\*\*)/g);
+          const runs=parts.filter(Boolean).map(p=>p.startsWith("**")&&p.endsWith("**")?new TextRun({text:p.slice(2,-2),font:"Arial",size:24,bold:true,rtl:true}):new TextRun({text:p,font:"Arial",size:24,rtl:true}));
+          children.push(new Paragraph({children:runs,alignment:AlignmentType.RIGHT,bidirectional:true,spacing:{before:60,after:60}}));
+        }
+      }
+      const doc=new Document({styles:{default:{document:{run:{font:"Arial",size:24,rtl:true},paragraph:{alignment:AlignmentType.RIGHT,bidirectional:true}}}},sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:1300,right:1800,bottom:1300,left:1440}}},children}]});
+      const rawBuf=await Packer.toBuffer(doc);
+      const zip=await JSZip.loadAsync(rawBuf);
+      let xml=await zip.file("word/document.xml").async("string");
+      xml=xml.replace(/<w:pPr>([\s\S]*?)<\/w:pPr>/g,(_,i)=>{
+        let f=i.replace(/<w:bidi\/>/g,"").replace(/<w:jc [^/]*\/>/g,"").trim();
+        const bp=f.search(/<w:(?:spacing|ind|rPr)\b/);
+        f=bp>=0?f.slice(0,bp)+"<w:bidi/>"+f.slice(bp):f+"<w:bidi/>";
+        const jp=f.search(/<w:rPr\b/);
+        f=jp>=0?f.slice(0,jp)+'<w:jc w:val="right"/>'+f.slice(jp):f+'<w:jc w:val="right"/>';
+        return`<w:pPr>${f}</w:pPr>`;
       });
-      if(!res.ok) throw new Error("שגיאה");
-      const blob=await res.blob();
+      xml=xml.replace(/<w:rPr>([\s\S]*?)<\/w:rPr>/g,(m,i)=>i.includes("<w:rtl/>")?m:`<w:rPr>${i}<w:rtl/></w:rPr>`);
+      xml=xml.replace(/(<w:r>)(\s*)(<w:t)/g,"$1$2<w:rPr><w:rtl/></w:rPr>$3");
+      zip.file("word/document.xml",xml);
+      const fixed=await zip.generateAsync({type:"arraybuffer",compression:"DEFLATE"});
+      const blob=new Blob([fixed],{type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
       const url=URL.createObjectURL(blob);
       const a=document.createElement("a");
-      a.href=url; a.download="מטלה.docx"; a.click();
+      a.href=url;a.download="מטלה.docx";a.click();
       URL.revokeObjectURL(url);
     }catch(e){alert("שגיאה: "+e.message);}
     finally{setWordLoading(false);}
