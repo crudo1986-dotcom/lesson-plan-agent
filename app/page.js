@@ -181,8 +181,8 @@ export default function App(){
             <svg width="17" height="17" viewBox="0 0 18 18" fill="none"><path d="M3 4.5h12M3 9h8M3 13.5h10" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/></svg>
           </div>
           <div>
-            <div style={{fontSize:13,fontWeight:600,color:G900,lineHeight:1.2}}>כלי AI לצוות החינוכי</div>
-            <div style={{fontSize:11,color:G500,lineHeight:1.2}}>מבוסס על תוכנית משרד החינוך</div>
+            <div style={{fontSize:13,fontWeight:600,color:G900,lineHeight:1.2}}>בוט מחקר "השפעת AI על למידה דיפרנציאלית"</div>
+            <div style={{fontSize:11,color:G500,lineHeight:1.2}}></div>
           </div>
         </div>
         <div style={{display:"flex",gap:3,background:G100,borderRadius:9,padding:3}}>
