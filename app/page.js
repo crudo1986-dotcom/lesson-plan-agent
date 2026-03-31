@@ -165,7 +165,7 @@ async function callAPI(payload){
 const MODES=[
   {id:"mentor",label:"מאמן פדגוגי"},
   {id:"tasks",label:"בונה מטלות"},
-  {id:"builder",label:"בונה מהיר"},
+  {id:"builder",label:"בניית מערך שיעור"},
 ];
 
 export default function App(){
