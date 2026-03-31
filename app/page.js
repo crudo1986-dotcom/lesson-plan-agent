@@ -177,9 +177,7 @@ export default function App(){
     <div style={{direction:"rtl",fontFamily:"'Segoe UI','Arial Hebrew',Arial,sans-serif",minHeight:"100vh",display:"flex",flexDirection:"column",background:BG}}>
       <nav style={{background:WH,borderBottom:`1px solid ${G200}`,padding:"0 28px",display:"flex",alignItems:"center",justifyContent:"space-between",height:58,flexShrink:0}}>
         <div style={{display:"flex",alignItems:"center",gap:11}}>
-          <div style={{width:34,height:34,background:IND,borderRadius:9,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-            <svg width="17" height="17" viewBox="0 0 18 18" fill="none"><path d="M3 4.5h12M3 9h8M3 13.5h10" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/></svg>
-          </div>
+  
           <div>
             <div style={{fontSize:13,fontWeight:600,color:G900,lineHeight:1.2}}>בוט מחקר "השפעת AI על למידה דיפרנציאלית"</div>
             <div style={{fontSize:11,color:G500,lineHeight:1.2}}></div>
@@ -260,9 +258,7 @@ function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
   if(!started) return(
     <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:32}}>
       <div style={{background:WH,borderRadius:18,border:`1px solid ${G200}`,padding:"44px 36px",maxWidth:460,width:"100%",textAlign:"center"}}>
-        <div style={{width:52,height:52,background:IND_L,borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 22px"}}>
-          <svg width="26" height="26" viewBox="0 0 28 28" fill="none"><path d="M5 7h18M5 14h12M5 21h15" stroke={IND} strokeWidth="2" strokeLinecap="round"/></svg>
-        </div>
+
         <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",marginBottom:28}}>
           {chips.map(c=><span key={c} style={{padding:"6px 14px",background:IND_L,borderRadius:20,fontSize:12,color:IND,fontWeight:500}}>{c}</span>)}
         </div>
