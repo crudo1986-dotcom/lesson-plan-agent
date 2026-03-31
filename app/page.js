@@ -98,15 +98,18 @@ const TASKS_PROMPT = `כל תגובותיך בעברית. כתוב תמיד מי
 כל תוכן שתיצור חייב להתבסס אך ורק על תוכניות הלימודים הרשמיות של משרד החינוך המפורטות לעיל.
 אם הנושא אינו מופיע בתוכנית — ציין זאת למורה וציין באיזו כיתה הוא נלמד לפי התוכנית.
 
-## פרוטוקול עבודה — 4 שאלות בלבד
+## פרוטוקול עבודה — 5 שאלות
 
-בתחילת כל שיחה שאל את 4 השאלות הבאות יחד, בהודעה אחת:
+בתחילת כל שיחה שאל את השאלות הבאות יחד, בהודעה אחת:
 1. מה הנושא, המקצוע והכיתה?
 2. כמה רמות דיפרנציאציה — 1, 2, או 3?
 3. קובץ Word להדפסה, או טקסט בצ'אט?
 4. לכלול טקסט לימודי קצר בתוך המסמך — כן או לא? (כן = מתאים כשאין ספר לימוד זמין. לא = רק המטלה עצמה.)
+5. (אופציונלי) מה מקור השונות בכיתה? לדוגמה: פער בקריאה, ידע קודם, עצמאות, מוטיבציה. ניתן לדלג — אם תענה, המטלה תהיה מדויקת יותר לצורך האמיתי.
 
 אחרי שהמורה ענה — צור את המטלה מיד. אל תשאל שאלות נוספות אלא אם חסר מידע קריטי.
+אם המורה דילג על שאלה 5 — בנה מטלה דיפרנציאלית סטנדרטית.
+אם המורה ענה על שאלה 5 — התאם את הרמות לסוג השונות שציין.
 
 אם המורה ענה "כן" לשאלה 4 — הוסף בתחילת המסמך טקסט לימודי קצר ומרוכז (עד חצי עמוד לכל רמה), לפני שאלות העבודה.
 
@@ -316,7 +319,7 @@ function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
 }
 
 function BuilderMode(){
-  const [form,setForm]=useState({subject:"",topic:"",grade:"",duration:"45 דקות",goals:"",levels:"כיתה הומוגנית",extras:{differentiation:true,thinking:true,sel:false}});
+  const [form,setForm]=useState({subject:"",topic:"",grade:"",duration:"45 דקות",goals:"",levels:"כיתה הומוגנית",extras:{differentiation:true,thinking:true,sel:false,diff_detail:false}});
   const [result,setResult]=useState(null);
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState(null);
@@ -328,6 +331,7 @@ function BuilderMode(){
     if(form.extras.differentiation) extras.push("התאמות מפורטות לרמות שונות");
     if(form.extras.thinking) extras.push("שאלות חשיבה מסדר גבוה");
     if(form.extras.sel) extras.push("רכיבים חברתיים-רגשיים");
+    if(form.extras.diff_detail) extras.push("לכל שלב בשיעור (פתיחה, גוף, סיכום) — פרט הנחיות מובדלות: מה עושים תלמידים הזקוקים לתמיכה, מה עושים תלמידים עצמאיים, ומה עושים תלמידים מעמיקים");
     return `אתה מומחה לפדגוגיה, הוראה מובדלת ותכנון לימודים בישראל.
 כל תוכן שתייצר חייב להתבסס על תוכניות הלימודים הרשמיות של משרד החינוך בלבד.
 בנה מערך שיעור מקצועי בעברית:
@@ -395,7 +399,7 @@ ${extras.length?`דרישות: ${extras.join(", ")}`:""}
         <div style={{background:"#FAFBFC",borderRadius:9,padding:"14px 18px",marginBottom:20,border:`1px solid ${G200}`}}>
           <div style={{fontSize:12,fontWeight:600,color:G700,marginBottom:10}}>רכיבים נוספים</div>
           <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
-            {[{key:"differentiation",label:"התאמות לרמות שונות"},{key:"thinking",label:"שאלות חשיבה מסדר גבוה"},{key:"sel",label:"רכיבים חברתיים-רגשיים"}].map(({key,label})=>(
+            {[{key:"differentiation",label:"התאמות לרמות שונות"},{key:"thinking",label:"שאלות חשיבה מסדר גבוה"},{key:"sel",label:"רכיבים חברתיים-רגשיים"},{key:"diff_detail",label:"פירוט הוראה דיפרנציאלית לכל שלב"}].map(({key,label})=>(
               <label key={key} style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer"}}>
                 <div onClick={()=>toggle(key)} style={{width:17,height:17,borderRadius:4,border:`2px solid ${form.extras[key]?IND:G200}`,background:form.extras[key]?IND:WH,display:"flex",alignItems:"center",justifyContent:"center"}}>
                   {form.extras[key]&&<svg width="9" height="9" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/></svg>}
