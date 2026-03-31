@@ -221,9 +221,7 @@ function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
-          messages:[{role:"user",content:"החזר את המטלה הבאה כפי שהיא, ללא שינויים:
-
-"+lastTaskText}],
+          messages:[{role:"user",content:`החזר את המטלה הבאה כפי שהיא, ללא שינויים:\n\n${lastTaskText}`}],
           system:systemPrompt,
           generateWord:true
         })
