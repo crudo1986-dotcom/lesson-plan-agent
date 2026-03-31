@@ -199,7 +199,6 @@ export default function App(){
 }
 
 function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
-function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
   const [messages,setMessages]=useState([]);
   const [input,setInput]=useState("");
   const [loading,setLoading]=useState(false);
