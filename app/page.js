@@ -1,8 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 
-// ─── System prompts ───────────────────────────────────────────────────────────
-
 const CURRICULUM = `
 ## תוכניות לימודים רשמיות — משרד החינוך הישראלי (חטיבת ביניים ממלכתי)
 
@@ -69,14 +67,14 @@ ${CURRICULUM}
 שכבה 5: מה תרגיש נוח לנסות?
 
 ## זיהוי רמת מורה (לזהות, לא לשאול)
-רמה 1: "אני נותן לכולם אותו דבר" → הסבר 80%, בנייה 20%
-רמה 2: "אני מבין אבל לא יודע לבחור אסטרטגיה" → 50/50
-רמה 3: "בניתי דף — רוצה שתעיף מבט?" → 70% המורה, 30% אתה
-רמה 4: "חשבתי לשלב שתי אסטרטגיות" → 90% דיאלוג שווה
+רמה 1: "אני נותן לכולם אותו דבר" — הסבר 80%, בנייה 20%
+רמה 2: "אני מבין אבל לא יודע לבחור אסטרטגיה" — 50/50
+רמה 3: "בניתי דף — רוצה שתעיף מבט?" — 70% המורה, 30% אתה
+רמה 4: "חשבתי לשלב שתי אסטרטגיות" — 90% דיאלוג שווה
 
 ## חוקי ברזל
 1. תהליך מלא: מבוא 5 דק' + 3 מסלולים 30 דק' + כרטיס יציאה 5 דק' + דיון 10 דק'
-2. 3 מסלולים שונים ממשית לפי רמות החשיבה: א' זכירה–הבנה, ב' הבנה–יישום–ניתוח, ג' ניתוח–הערכה–יצירה
+2. 3 מסלולים שונים ממשית לפי רמות החשיבה: א' זכירה-הבנה, ב' הבנה-יישום-ניתוח, ג' ניתוח-הערכה-יצירה
 3. שפה מכבדת: "תלמיד הזקוק לתמיכה" לא "חלש"
 4. אפס אימוג'ים. אפס ביטויי AI
 5. דקדוק עברי תקני
@@ -94,7 +92,7 @@ ${CURRICULUM}
 const TASKS_PROMPT = `כל תגובותיך בעברית. כתוב תמיד מימין לשמאל.
 
 אתה כלי לבניית מטלות דיפרנציאליות למקצועות רבי-מלל במערכת החינוך הישראלית.
-תפקידך: לשאול 3 שאלות בסיס, ולייצר מטלה מוכנה לשימוש מיידי.
+תפקידך: לשאול 4 שאלות בסיס, ולייצר מטלה מוכנה לשימוש מיידי.
 אתה לא מנטור ולא מנהל דיון — אתה בונה תוצר.
 
 כל תוכן שתיצור חייב להתבסס אך ורק על תוכניות הלימודים הרשמיות של משרד החינוך המפורטות לעיל.
@@ -117,15 +115,15 @@ const TASKS_PROMPT = `כל תגובותיך בעברית. כתוב תמיד מי
 כל מטלה כוללת: כותרת, הוראות לתלמיד, גוף המטלה לפי הרמות, כרטיס יציאה.
 
 שלוש רמות:
-רמה א — תמיכה מלאה: טקסט מפושט, פיגומים, שאלות סגורות-פתוחות. רמות חשיבה: זכירה–הבנה.
-רמה ב — ליבה: טקסט מלא, שאלות פתוחות. רמות חשיבה: הבנה–יישום–ניתוח.
-רמה ג — העמקה: טקסט מלא + מקור נוסף, שאלות מורכבות. רמות חשיבה: ניתוח–הערכה–יצירה.
+רמה א — תמיכה מלאה: טקסט מפושט, פיגומים, שאלות סגורות-פתוחות. רמות חשיבה: זכירה-הבנה.
+רמה ב — ליבה: טקסט מלא, שאלות פתוחות. רמות חשיבה: הבנה-יישום-ניתוח.
+רמה ג — העמקה: טקסט מלא + מקור נוסף, שאלות מורכבות. רמות חשיבה: ניתוח-הערכה-יצירה.
 
 שתי רמות:
 רמה א — תמיכה: טקסט מפושט, פיגומים.
 רמה ב — עצמאות: טקסט מלא, שאלות פתוחות.
 
-היקף ברירת מחדל: 3–5 שאלות לרמה, 20–30 דקות.
+היקף ברירת מחדל: 3-5 שאלות לרמה, 20-30 דקות.
 
 ## חוקי ברזל
 - דקדוק עברי תקני מושלם
@@ -147,139 +145,169 @@ const TASKS_PROMPT = `כל תגובותיך בעברית. כתוב תמיד מי
 
 הערות למורה: חובה לכלול — כיצד לחלק לרמות, קריטריון להערכה לכל רמה, מה לעשות עם כרטיסי היציאה.`;
 
-// ─── Quick builder data ───────────────────────────────────────────────────────
-const GRADES    = ["ז'", "ח'", "ט'", "י'", "י\"א", "י\"ב"];
-const SUBJECTS  = ["עברית", "תנ\"ך", "היסטוריה", "ספרות", "אזרחות", "גאוגרפיה", "אנגלית", "מדעים", "אחר"];
-const DURATIONS = ["45 דקות", "90 דקות", "שיעור כפול (2×45)"];
-const LEVELS    = ["כיתה הומוגנית", "רמות מעורבות – נמוך/בינוני/גבוה", "כיתה מתקדמת", "כיתה מחוזקת"];
+const GRADES    = ["ז'","ח'","ט'","י'","י\"א","י\"ב"];
+const SUBJECTS  = ["עברית","תנ\"ך","היסטוריה","ספרות","אזרחות","גאוגרפיה","אנגלית","מדעים","אחר"];
+const DURATIONS = ["45 דקות","90 דקות","שיעור כפול (2x45)"];
+const LEVELS    = ["כיתה הומוגנית","רמות מעורבות","כיתה מתקדמת","כיתה מחוזקת"];
 
-// ─── Shared API call ──────────────────────────────────────────────────────────
-async function callAPI(payload) {
-  const res  = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "שגיאת שרת");
+const IND="#4F46E5", IND_D="#3730A3", IND_L="#EEF2FF",
+      BG="#F7F8FC", WH="#FFFFFF",
+      G100="#F0F1F8", G200="#E2E5F0", G500="#6B7280", G700="#374151", G900="#1A1A2E",
+      RED="#DC2626", RED_BG="#FEF2F2";
+
+async function callAPI(payload){
+  const res=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  const data=await res.json();
+  if(!res.ok) throw new Error(data.error||"שגיאת שרת");
   return data.text;
 }
 
-// ─── Mode labels ──────────────────────────────────────────────────────────────
-const MODES = [
-  { id: "mentor",  label: "מאמן פדגוגי",  desc: "ליווי מקצועי בבניית הוראה דיפרנציאלית" },
-  { id: "tasks",   label: "בונה מטלות",   desc: "יצירת מטלות דיפרנציאליות מוכנות לשימוש" },
-  { id: "builder", label: "בונה מהיר",    desc: "הזן פרמטרים וקבל מערך שיעור תוך שניות" },
+const MODES=[
+  {id:"mentor",label:"מאמן פדגוגי"},
+  {id:"tasks",label:"בונה מטלות"},
+  {id:"builder",label:"בונה מהיר"},
 ];
 
-// ─── Root ─────────────────────────────────────────────────────────────────────
-export default function App() {
-  const [mode, setMode] = useState("mentor");
-  const current = MODES.find(m => m.id === mode);
-
-  return (
-    <div style={S.page}>
-      <div style={S.header}>
-        <div style={S.headerInner}>
-          <div style={S.headerSub}>כלי AI לצוות החינוכי</div>
-          <h1 style={S.headerTitle}>{current.label}</h1>
-          <div style={S.headerDesc}>{current.desc}</div>
-          <div style={S.toggle}>
-            {MODES.map(m => (
-              <button key={m.id} onClick={() => setMode(m.id)}
-                style={{ ...S.toggleBtn, ...(mode === m.id ? S.toggleActive : {}) }}>
-                {m.label}
-              </button>
-            ))}
+export default function App(){
+  const [mode,setMode]=useState("mentor");
+  return(
+    <div style={{direction:"rtl",fontFamily:"'Segoe UI','Arial Hebrew',Arial,sans-serif",minHeight:"100vh",display:"flex",flexDirection:"column",background:BG}}>
+      <nav style={{background:WH,borderBottom:`1px solid ${G200}`,padding:"0 28px",display:"flex",alignItems:"center",justifyContent:"space-between",height:58,flexShrink:0}}>
+        <div style={{display:"flex",alignItems:"center",gap:11}}>
+          <div style={{width:34,height:34,background:IND,borderRadius:9,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+            <svg width="17" height="17" viewBox="0 0 18 18" fill="none"><path d="M3 4.5h12M3 9h8M3 13.5h10" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/></svg>
+          </div>
+          <div>
+            <div style={{fontSize:13,fontWeight:600,color:G900,lineHeight:1.2}}>כלי AI לצוות החינוכי</div>
+            <div style={{fontSize:11,color:G500,lineHeight:1.2}}>מבוסס על תוכנית משרד החינוך</div>
           </div>
         </div>
-      </div>
-
-      {mode === "mentor"  && <ChatMode key="mentor"  systemPrompt={MENTOR_PROMPT} greeting={"שלום! אני המנטור הפדגוגי שלך.\n\nאני כאן כדי ללוות אותך בבניית הוראה דיפרנציאלית — לא לעשות במקומך, אלא לעזור לך לפתח את החשיבה הפדגוגית שלך.\n\nבוא נתחיל מהשטח: ספר לי על הכיתה שאתה רוצה לעבוד עליה — כמה תלמידים, איזה מקצוע, ומה מרגיש לך כרגע הכי מאתגר?"} chips={["אבחון כיתה ומורה", "שאלות סוקרטיות", "3 מסלולים דיפרנציאליים", "מעקב התקדמות"]} startLabel="התחל שיחה עם המנטור" />}
-      {mode === "tasks"   && <ChatMode key="tasks"   systemPrompt={TASKS_PROMPT}  greeting={"שלום! כדי לבנות את המטלה, אשאל שלוש שאלות קצרות:\n\n1. מה הנושא, המקצוע והכיתה?\n2. כמה רמות דיפרנציאציה — 1, 2, או 3?\n3. קובץ Word להדפסה, או טקסט בצ'אט?"} chips={["3 שאלות בלבד", "מטלה מוכנה מיד", "כרטיס יציאה אוטומטי", "עברית תקנית"]} startLabel="התחל בניית מטלה" />}
-      {mode === "builder" && <BuilderMode />}
-
-      <style>{`@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}`}</style>
+        <div style={{display:"flex",gap:3,background:G100,borderRadius:9,padding:3}}>
+          {MODES.map(m=>(
+            <button key={m.id} onClick={()=>setMode(m.id)} style={{padding:"6px 16px",borderRadius:6,border:"none",cursor:"pointer",fontSize:13,fontFamily:"inherit",fontWeight:mode===m.id?600:400,background:mode===m.id?WH:"transparent",color:mode===m.id?IND:G500,boxShadow:mode===m.id?"0 1px 3px rgba(0,0,0,0.08)":"none",transition:"all 0.15s"}}>
+              {m.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+      {mode==="mentor"&&<ChatMode key="mentor" systemPrompt={MENTOR_PROMPT} senderLabel="מאמן פדגוגי" greeting={"שלום! אני המאמן הפדגוגי שלך.\n\nאני כאן ללוות אותך בבניית הוראה דיפרנציאלית — לא לעשות במקומך, אלא לעזור לך לפתח את החשיבה הפדגוגית שלך.\n\nספר לי על הכיתה שאתה רוצה לעבוד עליה — כמה תלמידים, איזה מקצוע, ומה מרגיש לך הכי מאתגר?"} chips={["אבחון כיתה ומורה","שאלות סוקרטיות","3 מסלולים דיפרנציאליים","מעקב התקדמות"]} startLabel="התחל שיחה עם המאמן"/>}
+      {mode==="tasks"&&<ChatMode key="tasks" systemPrompt={TASKS_PROMPT} senderLabel="בונה מטלות" greeting={"שלום! כדי לבנות את המטלה, אשאל ארבע שאלות קצרות:\n\n1. מה הנושא, המקצוע והכיתה?\n2. כמה רמות הבדלה — 1, 2, או 3?\n3. קובץ Word להדפסה, או טקסט בשיחה?\n4. לכלול טקסט לימודי בתוך המסמך — כן או לא?"} chips={["4 שאלות בלבד","מטלה מוכנה מיד","כרטיס יציאה","עברית תקנית"]} startLabel="התחל בניית מטלה"/>}
+      {mode==="builder"&&<BuilderMode/>}
+      <style>{`@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}`}</style>
     </div>
   );
 }
 
-// ─── Chat mode (shared by mentor + tasks) ────────────────────────────────────
-function ChatMode({ systemPrompt, greeting, chips, startLabel }) {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput]       = useState("");
-  const [loading, setLoading]   = useState(false);
-  const [started, setStarted]   = useState(false);
-  const bottomRef               = useRef(null);
+function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
+function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
+  const [messages,setMessages]=useState([]);
+  const [input,setInput]=useState("");
+  const [loading,setLoading]=useState(false);
+  const [started,setStarted]=useState(false);
+  const [wordLoading,setWordLoading]=useState(false);
+  const [lastTaskText,setLastTaskText]=useState(null);
+  const bottomRef=useRef(null);
+  useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:"smooth"})},[messages,loading]);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
+  const isTaskComplete=(text)=>text&&text.length>800&&(
+    text.includes("רמה א")||text.includes("רמה ב")||
+    text.includes("כרטיס יציאה")||text.includes("הוראות לתלמיד")
+  );
 
-  const send = async (text) => {
-    if (!text.trim() || loading) return;
-    const userMsg = { role: "user", content: text };
-    const updated = [...messages, userMsg];
-    setMessages(updated);
-    setInput("");
-    setLoading(true);
-    try {
-      const reply = await callAPI({ messages: updated, system: systemPrompt });
-      setMessages([...updated, { role: "assistant", content: reply }]);
-    } catch (e) {
-      setMessages([...updated, { role: "assistant", content: `שגיאה: ${e.message}`, error: true }]);
-    } finally { setLoading(false); }
+  const downloadWord=async()=>{
+    if(!lastTaskText||wordLoading) return;
+    setWordLoading(true);
+    try{
+      const res=await fetch("/api/generate",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          messages:[{role:"user",content:"החזר את המטלה הבאה כפי שהיא, ללא שינויים:\n\n"+lastTaskText}],
+          system:systemPrompt,
+          generateWord:true
+        })
+      });
+      if(!res.ok) throw new Error("שגיאה");
+      const blob=await res.blob();
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url; a.download="מטלה.docx"; a.click();
+      URL.revokeObjectURL(url);
+    }catch(e){alert("שגיאה: "+e.message);}
+    finally{setWordLoading(false);}
   };
 
-  const start = () => {
-    setStarted(true);
-    setMessages([{ role: "assistant", content: greeting }]);
+  const send=async(text)=>{
+    if(!text.trim()||loading) return;
+    const userMsg={role:"user",content:text};
+    const updated=[...messages,userMsg];
+    setMessages(updated);setInput("");setLoading(true);
+    try{
+      const reply=await callAPI({messages:updated,system:systemPrompt});
+      setMessages([...updated,{role:"assistant",content:reply}]);
+      if(isTaskComplete(reply)) setLastTaskText(reply);
+    }catch(e){
+      setMessages([...updated,{role:"assistant",content:`שגיאה: ${e.message}`,error:true}]);
+    }finally{setLoading(false);}
   };
 
-  const handleKey = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } };
+  const start=()=>{setStarted(true);setMessages([{role:"assistant",content:greeting}]);};
+  const handleKey=(e)=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send(input);}};
 
-  if (!started) return (
-    <div style={S.centerFill}>
-      <div style={S.welcomeBox}>
-        <div style={S.chips}>{chips.map(c => <span key={c} style={S.chip}>{c}</span>)}</div>
-        <button onClick={start} style={S.primaryBtn}>{startLabel}</button>
+  if(!started) return(
+    <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:32}}>
+      <div style={{background:WH,borderRadius:18,border:`1px solid ${G200}`,padding:"44px 36px",maxWidth:460,width:"100%",textAlign:"center"}}>
+        <div style={{width:52,height:52,background:IND_L,borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 22px"}}>
+          <svg width="26" height="26" viewBox="0 0 28 28" fill="none"><path d="M5 7h18M5 14h12M5 21h15" stroke={IND} strokeWidth="2" strokeLinecap="round"/></svg>
+        </div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",marginBottom:28}}>
+          {chips.map(c=><span key={c} style={{padding:"6px 14px",background:IND_L,borderRadius:20,fontSize:12,color:IND,fontWeight:500}}>{c}</span>)}
+        </div>
+        <button onClick={start} style={{padding:"11px 32px",borderRadius:9,border:"none",background:IND,color:WH,fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>{startLabel}</button>
       </div>
     </div>
   );
 
-  return (
+  return(
     <>
-      <div style={S.chatScroll}>
-        <div style={S.chatInner}>
-          {messages.map((m, i) => (
-            <div key={i} style={{ ...S.row, justifyContent: m.role === "user" ? "flex-start" : "flex-end" }}>
-              <div style={{
-                ...S.bubble,
-                background:   m.role === "user" ? "#e8eaf6" : m.error ? "#ffebee" : "white",
-                borderRadius: m.role === "user" ? "16px 16px 16px 4px" : "16px 16px 4px 16px",
-                boxShadow:    m.role === "assistant" ? "0 2px 12px rgba(0,0,0,0.08)" : "none",
-                maxWidth:     m.role === "assistant" ? "82%" : "65%",
-              }}>
-                {m.role === "assistant" && <div style={S.sender}>עוזר AI</div>}
-                <div style={{ ...S.msgText, color: m.error ? "#c62828" : "#222" }}>{m.content}</div>
+      <div style={{flex:1,overflowY:"auto"}}>
+        <div style={{maxWidth:760,margin:"0 auto",padding:"24px 18px",display:"flex",flexDirection:"column",gap:12}}>
+          {messages.map((m,i)=>(
+            <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-start":"flex-end"}}>
+              <div style={{maxWidth:m.role==="assistant"?"80%":"65%",padding:"13px 17px",borderRadius:m.role==="user"?"16px 16px 16px 4px":"16px 16px 4px 16px",background:m.role==="user"?IND:m.error?RED_BG:WH,border:m.role==="assistant"?`1px solid ${G200}`:"none"}}>
+                {m.role==="assistant"&&<div style={{fontSize:11,color:G500,marginBottom:5,fontWeight:600}}>{senderLabel}</div>}
+                <div style={{fontSize:14,lineHeight:1.8,whiteSpace:"pre-wrap",wordBreak:"break-word",color:m.role==="user"?WH:m.error?RED:G900}}>{m.content}</div>
+                {m.role==="assistant"&&isTaskComplete(m.content)&&(
+                  <button onClick={downloadWord} disabled={wordLoading}
+                    style={{marginTop:12,padding:"8px 18px",borderRadius:8,border:"none",background:wordLoading?"#ccc":IND,color:WH,fontSize:13,fontWeight:600,cursor:wordLoading?"default":"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:7}}>
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v9M4 8l4 4 4-4M2 13h12" stroke={WH} strokeWidth="1.6" strokeLinecap="round"/></svg>
+                    {wordLoading?"יוצר קובץ...":"הורד קובץ Word"}
+                  </button>
+                )}
               </div>
             </div>
           ))}
-          {loading && (
-            <div style={{ ...S.row, justifyContent: "flex-end" }}>
-              <div style={{ ...S.bubble, background: "white", boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
-                <div style={S.sender}>עוזר AI</div>
-                <div style={{ display: "flex", gap: 5, padding: "4px 0" }}>
-                  {[0, 0.2, 0.4].map((d, i) => <span key={i} style={{ ...S.dot, animationDelay: `${d}s` }} />)}
+          {loading&&(
+            <div style={{display:"flex",justifyContent:"flex-end"}}>
+              <div style={{padding:"13px 17px",borderRadius:"16px 16px 4px 16px",background:WH,border:`1px solid ${G200}`}}>
+                <div style={{fontSize:11,color:G500,marginBottom:5,fontWeight:600}}>{senderLabel}</div>
+                <div style={{display:"flex",gap:4}}>
+                  {[0,.2,.4].map((d,i)=><span key={i} style={{width:7,height:7,borderRadius:"50%",background:G200,display:"inline-block",animation:`bounce 1.2s ${d}s infinite`}}/>)}
                 </div>
               </div>
             </div>
           )}
-          <div ref={bottomRef} />
+          <div ref={bottomRef}/>
         </div>
       </div>
-      <div style={S.inputBar}>
-        <div style={S.inputInner}>
-          <textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKey}
-            placeholder="כתוב כאן... (Enter לשליחה, Shift+Enter לשורה חדשה)"
-            rows={2} disabled={loading} style={S.textarea} />
-          <button onClick={() => send(input)} disabled={loading || !input.trim()}
-            style={{ ...S.primaryBtn, opacity: loading || !input.trim() ? 0.5 : 1, padding: "12px 24px", width: "auto" }}>
-            שלח
+      <div style={{background:WH,borderTop:`1px solid ${G200}`,padding:"12px 18px",flexShrink:0}}>
+        <div style={{maxWidth:760,margin:"0 auto",display:"flex",gap:9,alignItems:"flex-end"}}>
+          <textarea value={input} onChange={e=>setInput(e.target.value)} onKeyDown={handleKey}
+            placeholder="כתבו כאן... (Enter לשליחה)" rows={2} disabled={loading}
+            style={{flex:1,resize:"none",padding:"10px 13px",borderRadius:9,border:`1px solid ${G200}`,fontSize:14,fontFamily:"inherit",direction:"rtl",outline:"none",lineHeight:1.6,background:"#FAFBFC",color:G900}}/>
+          <button onClick={()=>send(input)} disabled={loading||!input.trim()}
+            style={{width:38,height:38,borderRadius:9,border:"none",background:loading||!input.trim()?G200:IND,cursor:loading||!input.trim()?"default":"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"background 0.15s"}}>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M13 8H3M8.5 3.5L13 8l-4.5 4.5" stroke={loading||!input.trim()?"#aaa":WH} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
         </div>
       </div>
@@ -287,171 +315,118 @@ function ChatMode({ systemPrompt, greeting, chips, startLabel }) {
   );
 }
 
-// ─── Builder mode ─────────────────────────────────────────────────────────────
-function BuilderMode() {
-  const [form, setForm] = useState({
-    subject: "", topic: "", grade: "", duration: "45 דקות", goals: "",
-    levels: "כיתה הומוגנית",
-    extras: { differentiation: true, thinking: true, sel: false },
-  });
-  const [result, setResult]   = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState(null);
-  const [step, setStep]       = useState("form");
+function BuilderMode(){
+  const [form,setForm]=useState({subject:"",topic:"",grade:"",duration:"45 דקות",goals:"",levels:"כיתה הומוגנית",extras:{differentiation:true,thinking:true,sel:false}});
+  const [result,setResult]=useState(null);
+  const [loading,setLoading]=useState(false);
+  const [error,setError]=useState(null);
+  const [step,setStep]=useState("form");
+  const toggle=(key)=>setForm(f=>({...f,extras:{...f.extras,[key]:!f.extras[key]}}));
 
-  const toggle = (key) => setForm(f => ({ ...f, extras: { ...f.extras, [key]: !f.extras[key] } }));
-
-  const buildPrompt = () => {
-    const extras = [];
-    if (form.extras.differentiation) extras.push("התאמות מפורטות לרמות שונות");
-    if (form.extras.thinking)        extras.push("שאלות חשיבה מסדר גבוה (בלומס)");
-    if (form.extras.sel)             extras.push("רכיבים חברתיים-רגשיים – מיומנויות חברתיות-רגשיות");
+  const buildPrompt=()=>{
+    const extras=[];
+    if(form.extras.differentiation) extras.push("התאמות מפורטות לרמות שונות");
+    if(form.extras.thinking) extras.push("שאלות חשיבה מסדר גבוה");
+    if(form.extras.sel) extras.push("רכיבים חברתיים-רגשיים");
     return `אתה מומחה לפדגוגיה, הוראה מובדלת ותכנון לימודים בישראל.
-כל תוכן שתייצר חייב להתבסס על תוכניות הלימודים הרשמיות של משרד החינוך בלבד. אם הנושא אינו מופיע בתוכנית — ציין זאת.
-בנה מערך שיעור מקצועי ומפורט בעברית:
+כל תוכן שתייצר חייב להתבסס על תוכניות הלימודים הרשמיות של משרד החינוך בלבד.
+בנה מערך שיעור מקצועי בעברית:
 מקצוע: ${form.subject} | נושא: ${form.topic} | כיתה: ${form.grade} | משך: ${form.duration}
-מטרות: ${form.goals || "הגדר לפי הנושא"} | הרכב: ${form.levels}
-${extras.length ? `דרישות: ${extras.join(", ")}` : ""}
-
+מטרות: ${form.goals||"הגדר לפי הנושא"} | הרכב: ${form.levels}
+${extras.length?`דרישות: ${extras.join(", ")}`:""}
 החזר JSON בלבד:
-{"title":"...","summary":"...","goals":["..."],"sections":[{"name":"פתיחה","duration":"X דקות","description":"...","activities":["..."]},{"name":"גוף השיעור","duration":"X דקות","description":"...","activities":["..."]},{"name":"סיכום","duration":"X דקות","description":"...","activities":["..."]},{"name":"הערכה","duration":"משולב","description":"...","activities":["..."]}${form.extras.differentiation?`,{"name":"התאמות","duration":"","description":"...","activities":["לתלמידים הזקוקים לתמיכה: ...","לתלמידים ברמת ביניים: ...","לתלמידים עצמאיים: ..."]}`:``}${form.extras.thinking?`,{"name":"שאלות חשיבה","duration":"","description":"...","activities":["...","...","..."]}`:``}${form.extras.sel?`,{"name":"רכיבים חברתיים-רגשיים","duration":"","description":"...","activities":["...","..."]}`:``}],"materials":["..."],"teacherNotes":"..."}`;
+{"title":"...","summary":"...","goals":["..."],"sections":[{"name":"פתיחה","duration":"X דקות","description":"...","activities":["..."]},{"name":"גוף השיעור","duration":"X דקות","description":"...","activities":["..."]},{"name":"סיכום","duration":"X דקות","description":"...","activities":["..."]}],"materials":["..."],"teacherNotes":"..."}`;
   };
 
-  const generate = async () => {
-    if (!form.subject || !form.topic || !form.grade) { setError("נא למלא מקצוע, נושא וכיתה"); return; }
-    setError(null); setLoading(true); setResult(null);
-    try {
-      const text  = await callAPI({ prompt: buildPrompt() });
-      const clean = text.replace(/```json|```/g, "").trim();
-      const match = clean.match(/\{[\s\S]*\}/);
-      if (!match) throw new Error("לא התקבל JSON תקין");
-      setResult(JSON.parse(match[0]));
-      setStep("result");
-    } catch (e) { setError(`שגיאה: ${e.message}`); }
-    finally { setLoading(false); }
+  const generate=async()=>{
+    if(!form.subject||!form.topic||!form.grade){setError("נא למלא מקצוע, נושא וכיתה");return;}
+    setError(null);setLoading(true);setResult(null);
+    try{
+      const text=await callAPI({prompt:buildPrompt()});
+      const clean=text.replace(/```json|```/g,"").trim();
+      const match=clean.match(/\{[\s\S]*\}/);
+      if(!match) throw new Error("לא התקבל JSON תקין");
+      setResult(JSON.parse(match[0]));setStep("result");
+    }catch(e){setError(`שגיאה: ${e.message}`);}
+    finally{setLoading(false);}
   };
 
-  if (step === "result" && result) return (
-    <div style={S.container}>
-      <div style={S.resultBanner}>
-        <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 6 }}>{form.subject} | כיתה {form.grade} | {form.duration}</div>
-        <h2 style={{ margin: "0 0 10px", fontSize: 22, fontWeight: 700 }}>{result.title}</h2>
-        <p style={{ margin: 0, opacity: 0.85, fontSize: 15, lineHeight: 1.6 }}>{result.summary}</p>
+  if(step==="result"&&result) return(
+    <div style={{maxWidth:800,margin:"0 auto",padding:"24px 18px",flex:1}}>
+      <div style={{background:IND,borderRadius:13,padding:"22px 26px",marginBottom:16,color:WH}}>
+        <div style={{fontSize:11,opacity:0.7,marginBottom:4}}>{form.subject} | כיתה {form.grade} | {form.duration}</div>
+        <h2 style={{margin:"0 0 7px",fontSize:19,fontWeight:700}}>{result.title}</h2>
+        <p style={{margin:0,opacity:0.85,fontSize:14,lineHeight:1.6}}>{result.summary}</p>
       </div>
-      {result.goals?.length > 0 && (
-        <Card title="מטרות השיעור">
-          <ul style={{ margin: 0, paddingRight: 20, lineHeight: 2 }}>
-            {result.goals.map((g, i) => <li key={i} style={{ color: "#333", fontSize: 15 }}>{g}</li>)}
-          </ul>
-        </Card>
-      )}
-      {result.sections?.map((sec, i) => (
-        <Card key={i} title={`${sec.name}${sec.duration ? ` — ${sec.duration}` : ""}`}
-          accent={sec.name === "פתיחה" ? "#1565c0" : sec.name === "גוף השיעור" ? "#1a237e" : "#37474f"}>
-          <p style={{ margin: "0 0 12px", color: "#555", fontSize: 15, lineHeight: 1.7 }}>{sec.description}</p>
-          {sec.activities?.map((a, j) => <div key={j} style={S.activity}>{a}</div>)}
-        </Card>
+      {result.goals?.length>0&&<BCard title="מטרות השיעור"><ul style={{margin:0,paddingRight:18,lineHeight:2}}>{result.goals.map((g,i)=><li key={i} style={{fontSize:14,color:G700}}>{g}</li>)}</ul></BCard>}
+      {result.sections?.map((sec,i)=>(
+        <BCard key={i} title={`${sec.name}${sec.duration?` — ${sec.duration}`:""}`} accent={i===0?"#0EA5E9":i===1?IND:"#6366F1"}>
+          <p style={{margin:"0 0 9px",fontSize:14,color:G700,lineHeight:1.7}}>{sec.description}</p>
+          {sec.activities?.map((a,j)=><div key={j} style={{padding:"8px 11px",marginBottom:6,background:IND_L,borderRadius:7,fontSize:13,color:G900,lineHeight:1.6,borderRight:`3px solid ${IND}`}}>{a}</div>)}
+        </BCard>
       ))}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-        {result.materials?.length > 0 && <Card title="חומרים נדרשים" compact><ul style={{ margin: 0, paddingRight: 18, lineHeight: 2 }}>{result.materials.map((m, i) => <li key={i} style={{ fontSize: 14, color: "#444" }}>{m}</li>)}</ul></Card>}
-        {result.teacherNotes && <Card title="הערות למורה" compact><p style={{ margin: 0, fontSize: 14, color: "#555", lineHeight: 1.7 }}>{result.teacherNotes}</p></Card>}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}}>
+        {result.materials?.length>0&&<BCard title="חומרים" compact><ul style={{margin:0,paddingRight:16,lineHeight:2}}>{result.materials.map((m,i)=><li key={i} style={{fontSize:13,color:G700}}>{m}</li>)}</ul></BCard>}
+        {result.teacherNotes&&<BCard title="הערות למורה" compact><p style={{margin:0,fontSize:13,color:G700,lineHeight:1.7}}>{result.teacherNotes}</p></BCard>}
       </div>
-      <div style={{ display: "flex", gap: 12 }}>
-        <button onClick={() => { setStep("form"); setResult(null); }} style={S.outlineBtn}>בנה מערך חדש</button>
-        <button onClick={() => window.print()} style={S.primaryBtn}>הדפס / שמור PDF</button>
+      <div style={{display:"flex",gap:9}}>
+        <button onClick={()=>{setStep("form");setResult(null);}} style={{flex:1,padding:"11px",borderRadius:9,border:`1px solid ${G200}`,background:WH,color:G700,fontSize:14,fontWeight:500,cursor:"pointer",fontFamily:"inherit"}}>בנה מערך חדש</button>
+        <button onClick={()=>window.print()} style={{flex:1,padding:"11px",borderRadius:9,border:"none",background:IND,color:WH,fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>הדפס / שמור PDF</button>
       </div>
     </div>
   );
 
-  return (
-    <div style={S.container}>
-      <div style={S.formCard}>
-        <h2 style={S.sectionTitle}>פרטי השיעור</h2>
-        <div style={S.grid3}>
-          <FF label="מקצוע *"><Sel value={form.subject} onChange={v => setForm(f=>({...f,subject:v}))} options={SUBJECTS} placeholder="בחר מקצוע" /></FF>
-          <FF label="כיתה *"><Sel value={form.grade} onChange={v => setForm(f=>({...f,grade:v}))} options={GRADES} placeholder="בחר כיתה" /></FF>
-          <FF label="משך"><Sel value={form.duration} onChange={v => setForm(f=>({...f,duration:v}))} options={DURATIONS} /></FF>
+  return(
+    <div style={{maxWidth:800,margin:"0 auto",padding:"24px 18px",flex:1}}>
+      <div style={{background:WH,borderRadius:14,border:`1px solid ${G200}`,padding:"28px 32px"}}>
+        <h2 style={{margin:"0 0 22px",fontSize:16,fontWeight:600,color:G900}}>פרטי השיעור</h2>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:16}}>
+          <BField label="מקצוע"><BSel value={form.subject} onChange={v=>setForm(f=>({...f,subject:v}))} options={SUBJECTS} placeholder="בחר מקצוע"/></BField>
+          <BField label="כיתה"><BSel value={form.grade} onChange={v=>setForm(f=>({...f,grade:v}))} options={GRADES} placeholder="בחר כיתה"/></BField>
+          <BField label="משך"><BSel value={form.duration} onChange={v=>setForm(f=>({...f,duration:v}))} options={DURATIONS}/></BField>
         </div>
-        <FF label="נושא השיעור *"><input value={form.topic} onChange={e=>setForm(f=>({...f,topic:e.target.value}))} placeholder="לדוגמה: המהפכה המדעית במאה ה-17" style={S.input} /></FF>
-        <FF label="מטרות (אופציונלי)"><textarea value={form.goals} onChange={e=>setForm(f=>({...f,goals:e.target.value}))} rows={3} style={{...S.input,resize:"vertical",lineHeight:1.6}} /></FF>
-        <FF label="הרכב הכיתה">
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {LEVELS.map(l => <button key={l} onClick={()=>setForm(f=>({...f,levels:l}))} style={{padding:"8px 16px",borderRadius:20,border:"2px solid",borderColor:form.levels===l?"#3949ab":"#e0e0e0",background:form.levels===l?"#e8eaf6":"white",color:form.levels===l?"#1a237e":"#666",cursor:"pointer",fontSize:13,fontWeight:form.levels===l?600:400}}>{l}</button>)}
+        <BField label="נושא השיעור"><input value={form.topic} onChange={e=>setForm(f=>({...f,topic:e.target.value}))} placeholder="לדוגמה: המהפכה המדעית במאה ה-17" style={inp}/></BField>
+        <BField label="מטרות (אופציונלי)"><textarea value={form.goals} onChange={e=>setForm(f=>({...f,goals:e.target.value}))} rows={3} style={{...inp,resize:"vertical",lineHeight:1.6}}/></BField>
+        <BField label="הרכב הכיתה">
+          <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+            {LEVELS.map(l=><button key={l} onClick={()=>setForm(f=>({...f,levels:l}))} style={{padding:"6px 13px",borderRadius:7,border:`1.5px solid ${form.levels===l?IND:G200}`,background:form.levels===l?IND_L:WH,color:form.levels===l?IND:G500,cursor:"pointer",fontSize:13,fontFamily:"inherit",fontWeight:form.levels===l?600:400}}>{l}</button>)}
           </div>
-        </FF>
-        <div style={S.extrasBox}>
-          <div style={S.extrasTitle}>רכיבים נוספים</div>
-          <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+        </BField>
+        <div style={{background:"#FAFBFC",borderRadius:9,padding:"14px 18px",marginBottom:20,border:`1px solid ${G200}`}}>
+          <div style={{fontSize:12,fontWeight:600,color:G700,marginBottom:10}}>רכיבים נוספים</div>
+          <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
             {[{key:"differentiation",label:"התאמות לרמות שונות"},{key:"thinking",label:"שאלות חשיבה מסדר גבוה"},{key:"sel",label:"רכיבים חברתיים-רגשיים"}].map(({key,label})=>(
-              <label key={key} style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}>
-                <div onClick={()=>toggle(key)} style={{width:20,height:20,borderRadius:5,border:"2px solid",borderColor:form.extras[key]?"#3949ab":"#bdbdbd",background:form.extras[key]?"#3949ab":"white",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                  {form.extras[key]&&<span style={{color:"white",fontSize:12}}>✓</span>}
+              <label key={key} style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer"}}>
+                <div onClick={()=>toggle(key)} style={{width:17,height:17,borderRadius:4,border:`2px solid ${form.extras[key]?IND:G200}`,background:form.extras[key]?IND:WH,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                  {form.extras[key]&&<svg width="9" height="9" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/></svg>}
                 </div>
-                <span style={{fontSize:14,color:"#444"}}>{label}</span>
+                <span style={{fontSize:13,color:G700}}>{label}</span>
               </label>
             ))}
           </div>
         </div>
-        {error && <div style={S.errorBox}>{error}</div>}
-        <button onClick={generate} disabled={loading} style={{...S.primaryBtn,width:"100%",padding:"16px",opacity:loading?0.7:1}}>
-          {loading ? "בונה מערך שיעור..." : "צור מערך שיעור"}
+        {error&&<div style={{color:RED,fontSize:13,marginBottom:13,padding:"9px 13px",background:RED_BG,borderRadius:7}}>{error}</div>}
+        <button onClick={generate} disabled={loading} style={{width:"100%",padding:"13px",borderRadius:9,border:"none",background:loading?G200:IND,color:loading?G500:WH,fontSize:14,fontWeight:600,cursor:loading?"default":"pointer",fontFamily:"inherit",transition:"background 0.15s"}}>
+          {loading?"בונה מערך שיעור...":"צור מערך שיעור"}
         </button>
       </div>
     </div>
   );
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-function Card({ title, children, accent = "#1a237e", compact }) {
-  return (
-    <div style={{ background:"white",borderRadius:14,boxShadow:"0 2px 12px rgba(0,0,0,0.06)",padding:compact?"20px 24px":"24px 28px",marginBottom:compact?0:16,borderTop:`3px solid ${accent}` }}>
-      <h3 style={{ margin:"0 0 14px",fontSize:16,color:accent,fontWeight:700 }}>{title}</h3>
+function BCard({title,children,accent=IND,compact}){
+  return(
+    <div style={{background:WH,borderRadius:11,border:`1px solid ${G200}`,padding:compact?"16px 20px":"20px 24px",marginBottom:compact?0:12,borderTop:`3px solid ${accent}`}}>
+      <h3 style={{margin:"0 0 11px",fontSize:14,color:accent,fontWeight:600}}>{title}</h3>
       {children}
     </div>
   );
 }
-function FF({ label, children }) {
-  return <div style={{ marginBottom:20 }}><label style={{ display:"block",fontSize:13,fontWeight:600,color:"#444",marginBottom:8 }}>{label}</label>{children}</div>;
+function BField({label,children}){
+  return<div style={{marginBottom:16}}><label style={{display:"block",fontSize:11,fontWeight:600,color:G500,marginBottom:6,letterSpacing:0.3}}>{label}</label>{children}</div>;
 }
-function Sel({ value, onChange, options, placeholder }) {
-  return <select value={value} onChange={e=>onChange(e.target.value)} style={S.input}>{placeholder&&<option value="">{placeholder}</option>}{options.map(o=><option key={o} value={o}>{o}</option>)}</select>;
+function BSel({value,onChange,options,placeholder}){
+  return<select value={value} onChange={e=>onChange(e.target.value)} style={inp}>{placeholder&&<option value="">{placeholder}</option>}{options.map(o=><option key={o} value={o}>{o}</option>)}</select>;
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-const S = {
-  page:        { direction:"rtl",fontFamily:"'Segoe UI','Arial Hebrew',Arial,sans-serif",minHeight:"100vh",display:"flex",flexDirection:"column",background:"#f5f7ff" },
-  header:      { background:"linear-gradient(90deg,#1a237e 0%,#283593 60%,#3949ab 100%)",color:"white",padding:"20px 40px 18px",boxShadow:"0 4px 24px rgba(26,35,126,0.18)",flexShrink:0 },
-  headerInner: { maxWidth:860,margin:"0 auto" },
-  headerSub:   { fontSize:12,opacity:0.7,marginBottom:3,letterSpacing:1 },
-  headerTitle: { margin:0,fontSize:24,fontWeight:700 },
-  headerDesc:  { fontSize:13,opacity:0.8,marginTop:4,marginBottom:16 },
-  toggle:      { display:"inline-flex",background:"rgba(255,255,255,0.15)",borderRadius:24,padding:4,gap:4 },
-  toggleBtn:   { padding:"7px 22px",borderRadius:20,border:"none",cursor:"pointer",fontSize:14,fontWeight:500,color:"rgba(255,255,255,0.75)",background:"transparent",transition:"all 0.2s" },
-  toggleActive: { background:"white",color:"#1a237e",fontWeight:700,boxShadow:"0 2px 8px rgba(0,0,0,0.15)" },
-  chatScroll:  { flex:1,overflowY:"auto" },
-  chatInner:   { maxWidth:820,margin:"0 auto",padding:"24px 20px",display:"flex",flexDirection:"column",gap:16 },
-  row:         { display:"flex",width:"100%" },
-  bubble:      { padding:"14px 18px" },
-  sender:      { fontSize:11,color:"#9fa8da",marginBottom:6,fontWeight:600,letterSpacing:0.5 },
-  msgText:     { fontSize:15,lineHeight:1.75,whiteSpace:"pre-wrap",wordBreak:"break-word" },
-  dot:         { width:8,height:8,borderRadius:"50%",background:"#9fa8da",display:"inline-block",animation:"bounce 1.2s infinite ease-in-out" },
-  inputBar:    { background:"white",borderTop:"1px solid #e8eaf6",padding:"14px 20px",flexShrink:0,boxShadow:"0 -4px 16px rgba(0,0,0,0.05)" },
-  inputInner:  { maxWidth:820,margin:"0 auto",display:"flex",gap:12,alignItems:"flex-end" },
-  textarea:    { flex:1,padding:"12px 16px",borderRadius:12,border:"1.5px solid #e0e0e0",fontSize:15,color:"#333",fontFamily:"inherit",direction:"rtl",resize:"none",outline:"none",lineHeight:1.6 },
-  centerFill:  { display:"flex",alignItems:"center",justifyContent:"center",flex:1,padding:"40px 20px" },
-  welcomeBox:  { background:"white",borderRadius:20,padding:"48px 40px",boxShadow:"0 4px 32px rgba(0,0,0,0.08)",maxWidth:520,width:"100%",textAlign:"center" },
-  chips:       { display:"flex",flexWrap:"wrap",gap:10,justifyContent:"center",marginBottom:32 },
-  chip:        { padding:"8px 16px",background:"#e8eaf6",borderRadius:20,fontSize:13,color:"#3949ab",fontWeight:500 },
-  container:   { maxWidth:860,margin:"0 auto",padding:"32px 20px",flex:1 },
-  formCard:    { background:"white",borderRadius:16,boxShadow:"0 2px 24px rgba(0,0,0,0.08)",padding:"36px 40px" },
-  sectionTitle: { margin:"0 0 28px",fontSize:18,color:"#1a237e",fontWeight:600 },
-  grid3:       { display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16,marginBottom:0 },
-  input:       { width:"100%",padding:"10px 14px",borderRadius:8,border:"1.5px solid #e0e0e0",fontSize:14,color:"#333",background:"white",outline:"none",boxSizing:"border-box",fontFamily:"inherit",direction:"rtl" },
-  extrasBox:   { background:"#f8f9ff",borderRadius:12,padding:"20px 24px",marginBottom:28,border:"1px solid #e8eaf6" },
-  extrasTitle: { fontSize:14,fontWeight:600,color:"#1a237e",marginBottom:14 },
-  errorBox:    { color:"#c62828",fontSize:13,marginBottom:16,padding:"10px 16px",background:"#ffebee",borderRadius:8 },
-  activity:    { padding:"10px 14px",marginBottom:8,background:"#f8f9ff",borderRadius:8,fontSize:14,color:"#333",lineHeight:1.6,borderRight:"3px solid #7986cb" },
-  resultBanner: { background:"linear-gradient(90deg,#1a237e,#3949ab)",color:"white",borderRadius:16,padding:"28px 36px",marginBottom:24 },
-  primaryBtn:  { flex:1,padding:"14px 32px",borderRadius:12,border:"none",background:"linear-gradient(90deg,#1a237e,#3949ab)",color:"white",fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 16px rgba(57,73,171,0.3)" },
-  outlineBtn:  { flex:1,padding:"14px 32px",borderRadius:12,border:"2px solid #3949ab",background:"white",color:"#1a237e",fontSize:15,fontWeight:600,cursor:"pointer" },
-};
+const inp={width:"100%",padding:"8px 12px",borderRadius:7,border:`1px solid ${G200}`,fontSize:13,color:G900,background:WH,outline:"none",boxSizing:"border-box",fontFamily:"inherit",direction:"rtl"};
