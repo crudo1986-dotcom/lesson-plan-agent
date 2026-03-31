@@ -242,7 +242,8 @@ function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
     const updated=[...messages,userMsg];
     setMessages(updated);setInput("");setLoading(true);
     try{
-      const reply=await callAPI({messages:updated,system:systemPrompt});
+      const cleanMessages=updated.filter(m=>!m.error).map(m=>({role:m.role,content:m.content}));
+      const reply=await callAPI({messages:cleanMessages,system:systemPrompt});
       setMessages([...updated,{role:"assistant",content:reply}]);
       if(isTaskComplete(reply)) setLastTaskText(reply);
     }catch(e){
