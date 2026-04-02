@@ -176,10 +176,7 @@ export default function App(){
   return(
     <div style={{direction:"rtl",fontFamily:"'Segoe UI','Arial Hebrew',Arial,sans-serif",minHeight:"100vh",display:"flex",flexDirection:"column",background:BG}}>
       <nav style={{background:WH,borderBottom:`1px solid ${G200}`,padding:"8px 16px",display:"flex",flexDirection:"column",alignItems:"center",gap:8,flexShrink:0}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%"}}>
-          <div style={{fontSize:11,fontWeight:600,color:G900,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"50%"}}>בוט מחקר "השפעת AI על למידה דיפרנציאלית"</div>
-          <img src="/Untitled design.png" alt="לוגו" style={{height:52,width:"auto",objectFit:"contain"}}/>
-        </div>
+        <div style={{fontSize:12,fontWeight:600,color:G900,textAlign:"center"}}>בוט מחקר "השפעת AI על למידה דיפרנציאלית"</div>
         <div style={{display:"flex",gap:3,background:G100,borderRadius:9,padding:3,width:"100%",justifyContent:"center"}}>
           {MODES.map(m=>(
             <button key={m.id} onClick={()=>setMode(m.id)} style={{flex:1,padding:"7px 8px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontFamily:"inherit",fontWeight:mode===m.id?600:400,background:mode===m.id?WH:"transparent",color:mode===m.id?IND:G500,boxShadow:mode===m.id?"0 1px 3px rgba(0,0,0,0.08)":"none",transition:"all 0.15s",whiteSpace:"nowrap"}}>
@@ -256,6 +253,7 @@ function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
     <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}}>
       <div style={{background:WH,borderRadius:18,border:`1px solid ${G200}`,padding:"clamp(24px, 5vw, 52px) clamp(20px, 5vw, 48px)",maxWidth:680,width:"100%",textAlign:"center"}}>
 
+        <img src="/Untitled design.png" alt="לוגו" style={{height:90,width:"auto",objectFit:"contain",marginBottom:20}}/>
         <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",marginBottom:28}}>
           {chips.map(c=><span key={c} style={{padding:"6px 14px",background:IND_L,borderRadius:20,fontSize:12,color:IND,fontWeight:500}}>{c}</span>)}
         </div>
