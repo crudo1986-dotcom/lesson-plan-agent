@@ -175,9 +175,9 @@ export default function App(){
   const [mode,setMode]=useState("mentor");
   return(
     <div style={{direction:"rtl",fontFamily:"'Segoe UI','Arial Hebrew',Arial,sans-serif",minHeight:"100vh",display:"flex",flexDirection:"column",background:BG}}>
-      <nav style={{background:WH,borderBottom:`1px solid ${G200}`,padding:"0 28px",display:"flex",alignItems:"center",justifyContent:"space-between",height:58,flexShrink:0}}>
-        <div style={{display:"flex",alignItems:"center",gap:11}}>
-  
+      <nav style={{background:WH,borderBottom:`1px solid ${G200}`,padding:"0 28px",display:"flex",alignItems:"center",justifyContent:"space-between",height:68,flexShrink:0}}>
+        <div style={{display:"flex",alignItems:"center",gap:14}}>
+          <img src="/logo.jpeg" alt="לוגו" style={{height:54,width:"auto",objectFit:"contain"}}/>
           <div>
             <div style={{fontSize:13,fontWeight:600,color:G900,lineHeight:1.2}}>בוט מחקר "השפעת AI על למידה דיפרנציאלית"</div>
             <div style={{fontSize:11,color:G500,lineHeight:1.2}}></div>
