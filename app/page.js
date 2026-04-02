@@ -254,9 +254,7 @@ function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
       <div style={{background:WH,borderRadius:18,border:`1px solid ${G200}`,padding:"clamp(24px, 5vw, 52px) clamp(20px, 5vw, 48px)",maxWidth:680,width:"100%",textAlign:"center"}}>
 
         <img src="/Untitled design.png" alt="לוגו" style={{height:90,width:"auto",objectFit:"contain",marginBottom:20}}/>
-        <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",marginBottom:28}}>
-          {chips.map(c=><span key={c} style={{padding:"6px 14px",background:IND_L,borderRadius:20,fontSize:12,color:IND,fontWeight:500}}>{c}</span>)}
-        </div>
+
         <button onClick={start} style={{padding:"11px 32px",borderRadius:9,border:"none",background:IND,color:WH,fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>{startLabel}</button>
       </div>
     </div>
