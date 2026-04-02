@@ -113,14 +113,18 @@ const TASKS_PROMPT = `כל תגובותיך בעברית. כתוב תמיד מי
 1. מה הנושא, המקצוע והכיתה?
 2. כמה רמות דיפרנציאציה — 1, 2, או 3?
 3. קובץ Word להדפסה, או טקסט בצ'אט?
-4. לכלול טקסט לימודי קצר בתוך המסמך — כן או לא? (כן = מתאים כשאין ספר לימוד זמין. לא = רק המטלה עצמה.)
-5. (אופציונלי) מה מקור השונות בכיתה? לדוגמה: פער בקריאה, ידע קודם, עצמאות, מוטיבציה. ניתן לדלג — אם תענה, המטלה תהיה מדויקת יותר לצורך האמיתי.
+4. מה המצב עם חומר הלימוד? בחר אחת מהאפשרויות:
+   א. יש ספר לימוד / דף קריאה — התלמידים קוראים ממנו. בנה מטלה בלי טקסט (הניח שהטקסט קיים).
+   ב. אין טקסט — צור טקסט לימודי קצר ומובנה בתוך המסמך (עד חצי עמוד לכל רמה, מותאם לרמה).
+   ג. יש לי טקסט מקורי שאני רוצה לצרף — הדבק אותו בהודעה הבאה ואבנה מטלה עליו.
+5. (אופציונלי) מה מקור השונות בכיתה? לדוגמה: פער בקריאה, ידע קודם, עצמאות, מוטיבציה. ניתן לדלג — אם תענה, המטלה תהיה מדויקת יותר.
 
-אחרי שהמורה ענה — צור את המטלה מיד. אל תשאל שאלות נוספות אלא אם חסר מידע קריטי.
+אחרי שהמורה ענה — פעל כך:
+- אם בחר א' — בנה מטלה מיד ללא טקסט.
+- אם בחר ב' — בנה מטלה עם טקסט לימודי מובנה בפנים.
+- אם בחר ג' — בקש ממנו להדביק את הטקסט בהודעה הבאה, ואחרי שידביק — בנה מטלה עליו.
 אם המורה דילג על שאלה 5 — בנה מטלה דיפרנציאלית סטנדרטית.
 אם המורה ענה על שאלה 5 — התאם את הרמות לסוג השונות שציין.
-
-אם המורה ענה "כן" לשאלה 4 — הוסף בתחילת המסמך טקסט לימודי קצר ומרוכז (עד חצי עמוד לכל רמה), לפני שאלות העבודה.
 
 ## בניית המטלה
 
@@ -214,7 +218,7 @@ export default function App(){
         </div>
       </nav>
       {mode==="mentor"&&<ChatMode key="mentor" systemPrompt={MENTOR_PROMPT} senderLabel="מאמן פדגוגי" greeting={"שלום! אני המאמן הפדגוגי שלך.\n\nאני כאן ללוות אותך בבניית הוראה דיפרנציאלית — לא לעשות במקומך, אלא לעזור לך לפתח את החשיבה הפדגוגית שלך.\n\nספר לי על הכיתה שאתה רוצה לעבוד עליה — כמה תלמידים, איזה מקצוע, ומה מרגיש לך הכי מאתגר?"} chips={["אבחון כיתה ומורה","שאלות סוקרטיות","3 מסלולים דיפרנציאליים","מעקב התקדמות"]} startLabel="התחל שיחה עם המאמן"/>}
-      {mode==="tasks"&&<ChatMode key="tasks" systemPrompt={TASKS_PROMPT} senderLabel="בונה מטלות" greeting={"שלום! כדי לבנות את המטלה, אשאל ארבע שאלות קצרות:\n\n1. מה הנושא, המקצוע והכיתה?\n2. כמה רמות הבדלה — 1, 2, או 3?\n3. קובץ Word להדפסה, או טקסט בשיחה?\n4. לכלול טקסט לימודי בתוך המסמך — כן או לא?"} chips={["4 שאלות בלבד","מטלה מוכנה מיד","כרטיס יציאה","עברית תקנית"]} startLabel="התחל בניית מטלה"/>}
+      {mode==="tasks"&&<ChatMode key="tasks" systemPrompt={TASKS_PROMPT} senderLabel="בונה מטלות" greeting={"שלום! כדי לבנות את המטלה, אשאל כמה שאלות קצרות:\n\n1. מה הנושא, המקצוע והכיתה?\n2. כמה רמות דיפרנציאציה — 1, 2, או 3?\n3. קובץ Word להדפסה, או טקסט בצ'אט?\n4. מה המצב עם חומר הלימוד?\n   א. יש ספר / דף קריאה — בנה מטלה בלי טקסט\n   ב. אין טקסט — צור טקסט לימודי בתוך המסמך\n   ג. יש לי טקסט — אדביק אותו בהודעה הבאה\n5. (אופציונלי) מה מקור השונות בכיתה?"} chips={["4 שאלות בלבד","מטלה מוכנה מיד","כרטיס יציאה","עברית תקנית"]} startLabel="התחל בניית מטלה"/>}
       {mode==="builder"&&<BuilderMode/>}
       <style>{`@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}`}</style>
     </div>
@@ -276,6 +280,7 @@ function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
 
   const start=()=>{setStarted(true);setMessages([{role:"assistant",content:greeting}]);};
   const handleKey=(e)=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send(input);}};
+  const textareaRows=input.length>0?Math.min(8,Math.max(2,Math.ceil(input.length/60))):2;
 
   if(!started) return(
     <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}}>
@@ -323,8 +328,8 @@ function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
       <div style={{background:WH,borderTop:`1px solid ${G200}`,padding:"12px 18px",flexShrink:0}}>
         <div style={{maxWidth:760,margin:"0 auto",display:"flex",gap:9,alignItems:"flex-end"}}>
           <textarea value={input} onChange={e=>setInput(e.target.value)} onKeyDown={handleKey}
-            placeholder="כתבו כאן... (Enter לשליחה)" rows={2} disabled={loading}
-            style={{flex:1,resize:"none",padding:"10px 13px",borderRadius:9,border:`1px solid ${G200}`,fontSize:14,fontFamily:"inherit",direction:"rtl",outline:"none",lineHeight:1.6,background:"#FAFBFC",color:G900}}/>
+            placeholder="כתבו כאן... (Enter לשליחה)" rows={textareaRows} disabled={loading}
+            style={{flex:1,resize:"none",padding:"10px 13px",borderRadius:9,border:`1px solid ${input.length>0?IND:G200}`,fontSize:14,fontFamily:"inherit",direction:"rtl",outline:"none",lineHeight:1.6,background:"#FAFBFC",color:G900,transition:"all 0.2s"}}/>
           <button onClick={()=>send(input)} disabled={loading||!input.trim()}
             style={{width:38,height:38,borderRadius:9,border:"none",background:loading||!input.trim()?G200:IND,cursor:loading||!input.trim()?"default":"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"background 0.15s"}}>
             <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M13 8H3M8.5 3.5L13 8l-4.5 4.5" stroke={loading||!input.trim()?"#aaa":WH} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
