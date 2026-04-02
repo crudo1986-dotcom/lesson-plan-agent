@@ -175,14 +175,9 @@ export default function App(){
   const [mode,setMode]=useState("mentor");
   return(
     <div style={{direction:"rtl",fontFamily:"'Segoe UI','Arial Hebrew',Arial,sans-serif",minHeight:"100vh",display:"flex",flexDirection:"column",background:BG}}>
-      <nav style={{background:WH,borderBottom:`1px solid ${G200}`,padding:"0 28px",display:"flex",alignItems:"center",justifyContent:"space-between",height:68,flexShrink:0}}>
-        <div style={{display:"flex",alignItems:"center",gap:14}}>
-          <img src="/Untitled design.png" alt="לוגו" style={{height:54,width:"auto",objectFit:"contain"}}/>
-          <div>
-            <div style={{fontSize:13,fontWeight:600,color:G900,lineHeight:1.2}}>בוט מחקר "השפעת AI על למידה דיפרנציאלית"</div>
-            <div style={{fontSize:11,color:G500,lineHeight:1.2}}></div>
-          </div>
-        </div>
+      <nav style={{background:WH,borderBottom:`1px solid ${G200}`,padding:"0 24px",display:"flex",alignItems:"center",justifyContent:"space-between",height:80,flexShrink:0,position:"relative"}}>
+        <div style={{fontSize:13,fontWeight:600,color:G900}}>בוט מחקר "השפעת AI על למידה דיפרנציאלית"</div>
+        <img src="/Untitled design.png" alt="לוגו" style={{height:70,width:"auto",objectFit:"contain",position:"absolute",left:"50%",transform:"translateX(-50%)"}}/>
         <div style={{display:"flex",gap:3,background:G100,borderRadius:9,padding:3}}>
           {MODES.map(m=>(
             <button key={m.id} onClick={()=>setMode(m.id)} style={{padding:"6px 16px",borderRadius:6,border:"none",cursor:"pointer",fontSize:13,fontFamily:"inherit",fontWeight:mode===m.id?600:400,background:mode===m.id?WH:"transparent",color:mode===m.id?IND:G500,boxShadow:mode===m.id?"0 1px 3px rgba(0,0,0,0.08)":"none",transition:"all 0.15s"}}>
@@ -256,8 +251,8 @@ function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
   const handleKey=(e)=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send(input);}};
 
   if(!started) return(
-    <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:32}}>
-      <div style={{background:WH,borderRadius:18,border:`1px solid ${G200}`,padding:"44px 36px",maxWidth:460,width:"100%",textAlign:"center"}}>
+    <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+      <div style={{background:WH,borderRadius:18,border:`1px solid ${G200}`,padding:"52px 48px",maxWidth:680,width:"100%",textAlign:"center"}}>
 
         <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",marginBottom:28}}>
           {chips.map(c=><span key={c} style={{padding:"6px 14px",background:IND_L,borderRadius:20,fontSize:12,color:IND,fontWeight:500}}>{c}</span>)}
