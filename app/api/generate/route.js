@@ -65,8 +65,22 @@ async function fixRtlBuffer(buffer) {
 }
 
 export async function POST(req) {
-  const { messages, system, prompt, generateWord } = await req.json();
-  const apiMessages = messages || [{ role: "user", content: prompt }];
+const { messages, system, prompt, generateWord, rawText } = await req.json();
+  if (rawText && generateWord) {
+    try {
+      const doc = buildDoc(rawText);
+      const rawBuffer = await Packer.toBuffer(doc);
+      const fixedBuffer = await fixRtlBuffer(rawBuffer);
+      return new Response(fixedBuffer, {
+        headers: {
+          "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "Content-Disposition": "attachment; filename*=UTF-8''%D7%9E%D7%98%D7%9C%D7%94.docx",
+        },
+      });
+    } catch (e) {
+      return Response.json({ error: "שגיאה ביצירת Word: " + e.message }, { status: 500 });
+    }
+  }  const apiMessages = messages || [{ role: "user", content: prompt }];
   const body = { model: "claude-sonnet-4-20250514", max_tokens: 4000, messages: apiMessages };
   if (system) body.system = system;
 
