@@ -274,7 +274,9 @@ function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
       setMessages([...updated,{role:"assistant",content:reply}]);
       if(isTaskComplete(reply)) setLastTaskText(reply);
     }catch(e){
-      setMessages([...updated,{role:"assistant",content:`שגיאה: ${e.message}`,error:true}]);
+      const isOverload=e.message.includes("overloaded")||e.message.includes("529");
+      const errMsg=isOverload?"השרת עמוס כרגע — המתן כמה שניות ונסה שוב.":"משהו השתבש. נסה שוב.";
+      setMessages([...updated,{role:"assistant",content:errMsg,error:true,retryText:text}]);
     }finally{setLoading(false);}
   };
 
@@ -295,6 +297,10 @@ function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
 
   return(
     <>
+      <div style={{background:WH,borderBottom:`1px solid ${G200}`,padding:"8px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
+        <div style={{fontSize:12,fontWeight:600,color:G500}}>{senderLabel}</div>
+        <button onClick={()=>{setStarted(false);setMessages([]);setInput("");setLastTaskText(null);}} style={{padding:"5px 14px",borderRadius:7,border:`1px solid ${G200}`,background:WH,color:G500,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>התחל מחדש</button>
+      </div>
       <div style={{flex:1,overflowY:"auto"}}>
         <div style={{maxWidth:760,margin:"0 auto",padding:"24px 18px",display:"flex",flexDirection:"column",gap:12}}>
           {messages.map((m,i)=>(
@@ -302,6 +308,7 @@ function ChatMode({systemPrompt,greeting,chips,startLabel,senderLabel}){
               <div style={{maxWidth:m.role==="assistant"?"80%":"65%",padding:"13px 17px",borderRadius:m.role==="user"?"16px 16px 16px 4px":"16px 16px 4px 16px",background:m.role==="user"?IND:m.error?RED_BG:WH,border:m.role==="assistant"?`1px solid ${G200}`:"none"}}>
                 {m.role==="assistant"&&<div style={{fontSize:11,color:G500,marginBottom:5,fontWeight:600}}>{senderLabel}</div>}
                 <div style={{fontSize:14,lineHeight:1.8,whiteSpace:"pre-wrap",wordBreak:"break-word",color:m.role==="user"?WH:m.error?RED:G900}}>{m.content}</div>
+                {m.error&&m.retryText&&<button onClick={()=>send(m.retryText)} style={{marginTop:8,padding:"5px 14px",borderRadius:7,border:`1px solid ${RED}`,background:WH,color:RED,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>נסה שוב</button>}
                 {m.role==="assistant"&&isTaskComplete(m.content)&&(
                   <button onClick={downloadWord} disabled={wordLoading}
                     style={{marginTop:12,padding:"8px 18px",borderRadius:8,border:"none",background:wordLoading?"#ccc":IND,color:WH,fontSize:13,fontWeight:600,cursor:wordLoading?"default":"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:7}}>
