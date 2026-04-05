@@ -165,6 +165,7 @@ const MODES = [
   { id: "mentor",  label: "מאמן פדגוגי" },
   { id: "tasks",   label: "בונה מטלות" },
   { id: "builder", label: "בניית מערך שיעור" },
+  { id: "journal", label: "יומן מורה" },
 ];
 
 export default function App() {
@@ -199,6 +200,7 @@ export default function App() {
         startLabel="התחל בניית מטלה"/>}
 
       {mode==="builder" && <BuilderMode/>}
+      {mode==="journal" && <JournalMode/>}
 
       {/* FIX 5: Print CSS — מסתיר ניווט ופקדים בעת הדפסה */}
       <style>{`
@@ -623,6 +625,168 @@ ${extras.length ? `דרישות: ${extras.join(", ")}` : ""}
           {loading ? "בונה מערך שיעור..." : "צור מערך שיעור"}
         </button>
       </div>
+    </div>
+  );
+}
+
+const JOURNAL_QUESTIONS = [
+  { key: "q1", label: "מה ניסיתי השבוע עם הצ'אטבוט?",          placeholder: "תאר את הפעילות שביצעת..." },
+  { key: "q2", label: "מה עבד טוב?",                             placeholder: "רגעים מוצלחים, תגובות מפתיעות של תלמידים..." },
+  { key: "q3", label: "מה היה קשה או לא עבד?",                  placeholder: "קשיים שנתקלת בהם, מה לא הלך כמצופה..." },
+  { key: "q4", label: "מה למדתי השבוע על הוראה דיפרנציאלית?",   placeholder: "תובנות חדשות, שינוי בתפיסה..." },
+  { key: "q5", label: "מה אני רוצה לנסות בשבוע הבא?",           placeholder: "רעיונות לשיפור, ניסויים חדשים..." },
+];
+
+function JournalMode() {
+  const STORAGE_KEY = "teacher_journal";
+
+  const loadEntries = () => {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
+  };
+
+  const [entries, setEntries]   = useState(loadEntries);
+  const [current, setCurrent]   = useState({ date: todayStr(), answers: {} });
+  const [copied,  setCopied]    = useState(false);
+  const [view,    setView]      = useState("write"); // "write" | "history"
+
+  function todayStr() {
+    return new Date().toLocaleDateString("he-IL", { day:"2-digit", month:"2-digit", year:"numeric" });
+  }
+
+  const setAnswer = (key, val) =>
+    setCurrent(c => ({ ...c, answers: { ...c.answers, [key]: val } }));
+
+  const saveEntry = () => {
+    const hasContent = JOURNAL_QUESTIONS.some(q => (current.answers[q.key] || "").trim());
+    if (!hasContent) return;
+    const updated = [{ ...current, savedAt: new Date().toISOString() }, ...entries];
+    setEntries(updated);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)); } catch {}
+    setCurrent({ date: todayStr(), answers: {} });
+    setView("history");
+  };
+
+  const buildText = (entry) => {
+    const lines = [`יומן מורה — ${entry.date}`, ""];
+    JOURNAL_QUESTIONS.forEach(q => {
+      const ans = (entry.answers[q.key] || "").trim();
+      if (ans) { lines.push(`${q.label}`); lines.push(ans); lines.push(""); }
+    });
+    return lines.join("\n");
+  };
+
+  const copyEntry = (entry) => {
+    navigator.clipboard.writeText(buildText(entry)).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  const deleteEntry = (idx) => {
+    const updated = entries.filter((_, i) => i !== idx);
+    setEntries(updated);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)); } catch {}
+  };
+
+  return (
+    <div style={{ maxWidth:760, margin:"0 auto", padding:"24px 18px", flex:1 }}>
+
+      {/* כותרת + טאבים */}
+      <div style={{ display:"flex", gap:8, marginBottom:20 }}>
+        {[{ id:"write", label:"כתיבה שבועית" }, { id:"history", label:`היסטוריה (${entries.length})` }].map(t => (
+          <button key={t.id} onClick={() => setView(t.id)}
+            style={{ padding:"7px 18px", borderRadius:8, border:`1.5px solid ${view===t.id ? IND : G200}`,
+              background: view===t.id ? IND_L : WH, color: view===t.id ? IND : G500,
+              fontWeight: view===t.id ? 600 : 400, fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* מסך כתיבה */}
+      {view==="write" && (
+        <div style={{ background:WH, borderRadius:14, border:`1px solid ${G200}`, padding:"28px 32px" }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:22 }}>
+            <h2 style={{ margin:0, fontSize:16, fontWeight:600, color:G900 }}>יומן שבועי</h2>
+            <div style={{ fontSize:12, color:G500, background:G100, padding:"4px 12px", borderRadius:20 }}>{current.date}</div>
+          </div>
+
+          {JOURNAL_QUESTIONS.map(q => (
+            <div key={q.key} style={{ marginBottom:20 }}>
+              <label style={{ display:"block", fontSize:13, fontWeight:600, color:G700, marginBottom:7 }}>
+                {q.label}
+              </label>
+              <textarea
+                value={current.answers[q.key] || ""}
+                onChange={e => setAnswer(q.key, e.target.value)}
+                placeholder={q.placeholder}
+                rows={3}
+                style={{ width:"100%", padding:"10px 13px", borderRadius:9, border:`1px solid ${G200}`,
+                  fontSize:13, fontFamily:"inherit", direction:"rtl", outline:"none",
+                  lineHeight:1.7, resize:"vertical", background:"#FAFBFC", color:G900,
+                  boxSizing:"border-box" }}
+              />
+            </div>
+          ))}
+
+          <div style={{ display:"flex", gap:9, marginTop:8 }}>
+            <button onClick={saveEntry}
+              style={{ flex:1, padding:"12px", borderRadius:9, border:"none", background:IND,
+                color:WH, fontSize:14, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>
+              שמור רשומה
+            </button>
+            <button onClick={() => copyEntry(current)}
+              style={{ padding:"12px 20px", borderRadius:9, border:`1px solid ${G200}`,
+                background:WH, color: copied ? IND : G700, fontSize:13, fontWeight:500,
+                cursor:"pointer", fontFamily:"inherit", transition:"color 0.2s" }}>
+              {copied ? "הועתק ✓" : "העתק לשליחה"}
+            </button>
+          </div>
+          <p style={{ fontSize:11, color:G500, marginTop:10, textAlign:"center" }}>
+            לאחר ההעתקה — הדבק בווטסאפ או במייל ושלח לחוקר
+          </p>
+        </div>
+      )}
+
+      {/* היסטוריה */}
+      {view==="history" && (
+        <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+          {entries.length === 0 && (
+            <div style={{ textAlign:"center", color:G500, padding:"60px 0", fontSize:14 }}>
+              עוד לא נשמרו רשומות
+            </div>
+          )}
+          {entries.map((entry, idx) => (
+            <div key={idx} style={{ background:WH, borderRadius:12, border:`1px solid ${G200}`,
+              padding:"20px 24px", borderTop:`3px solid ${IND}` }}>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+                <span style={{ fontSize:13, fontWeight:600, color:G900 }}>{entry.date}</span>
+                <div style={{ display:"flex", gap:8 }}>
+                  <button onClick={() => copyEntry(entry)}
+                    style={{ padding:"5px 14px", borderRadius:7, border:`1px solid ${G200}`,
+                      background:WH, color:G700, fontSize:12, cursor:"pointer", fontFamily:"inherit" }}>
+                    העתק לשליחה
+                  </button>
+                  <button onClick={() => deleteEntry(idx)}
+                    style={{ padding:"5px 10px", borderRadius:7, border:`1px solid ${RED_BG}`,
+                      background:RED_BG, color:RED, fontSize:12, cursor:"pointer", fontFamily:"inherit" }}>
+                    מחק
+                  </button>
+                </div>
+              </div>
+              {JOURNAL_QUESTIONS.map(q => {
+                const ans = (entry.answers[q.key] || "").trim();
+                if (!ans) return null;
+                return (
+                  <div key={q.key} style={{ marginBottom:12 }}>
+                    <div style={{ fontSize:11, fontWeight:600, color:IND, marginBottom:3 }}>{q.label}</div>
+                    <div style={{ fontSize:13, color:G700, lineHeight:1.7, whiteSpace:"pre-wrap" }}>{ans}</div>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
