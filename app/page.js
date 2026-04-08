@@ -629,6 +629,11 @@ ${extras.length ? `דרישות: ${extras.join(", ")}` : ""}
   );
 }
 
+// EmailJS credentials
+const EJS_SERVICE  = "service_j8uclds";
+const EJS_TEMPLATE = "template_be2fy9j";
+const EJS_KEY      = "0rPmh-xVzTSaExJ1X";
+
 const JOURNAL_QUESTIONS = [
   { key: "q1", label: "מה ניסיתי השבוע עם הצ'אטבוט?",          placeholder: "תאר את הפעילות שביצעת..." },
   { key: "q2", label: "מה עבד טוב?",                             placeholder: "רגעים מוצלחים, תגובות מפתיעות של תלמידים..." },
@@ -638,47 +643,85 @@ const JOURNAL_QUESTIONS = [
 ];
 
 function JournalMode() {
-  const STORAGE_KEY = "teacher_journal";
+  const STORAGE_KEY      = "teacher_journal";
+  const TEACHER_NAME_KEY = "teacher_name";
 
   const loadEntries = () => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
   };
 
-  const [entries, setEntries]   = useState(loadEntries);
-  const [current, setCurrent]   = useState({ date: todayStr(), answers: {} });
-  const [copied,  setCopied]    = useState(false);
-  const [view,    setView]      = useState("write"); // "write" | "history"
+  const [entries,     setEntries]     = useState(loadEntries);
+  const [teacherName, setTeacherName] = useState(() => {
+    try { return localStorage.getItem(TEACHER_NAME_KEY) || ""; } catch { return ""; }
+  });
+  const [current,  setCurrent]  = useState({ date: todayStr(), answers: {} });
+  const [view,     setView]     = useState("write");
+  const [sending,  setSending]  = useState(false);
+  const [sendStatus, setSendStatus] = useState(null); // "ok" | "err"
 
   function todayStr() {
     return new Date().toLocaleDateString("he-IL", { day:"2-digit", month:"2-digit", year:"numeric" });
   }
 
+  // שמירת שם המורה ב-localStorage
+  const handleNameChange = (val) => {
+    setTeacherName(val);
+    try { localStorage.setItem(TEACHER_NAME_KEY, val); } catch {}
+  };
+
   const setAnswer = (key, val) =>
     setCurrent(c => ({ ...c, answers: { ...c.answers, [key]: val } }));
 
-  const saveEntry = () => {
-    const hasContent = JOURNAL_QUESTIONS.some(q => (current.answers[q.key] || "").trim());
-    if (!hasContent) return;
-    const updated = [{ ...current, savedAt: new Date().toISOString() }, ...entries];
-    setEntries(updated);
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)); } catch {}
-    setCurrent({ date: todayStr(), answers: {} });
-    setView("history");
-  };
-
-  const buildText = (entry) => {
-    const lines = [`יומן מורה — ${entry.date}`, ""];
+  const buildText = (entry, name) => {
+    const lines = [
+      `יומן מורה שבועי`,
+      `שם המורה: ${name || "לא צוין"}`,
+      `תאריך: ${entry.date}`,
+      "",
+    ];
     JOURNAL_QUESTIONS.forEach(q => {
       const ans = (entry.answers[q.key] || "").trim();
-      if (ans) { lines.push(`${q.label}`); lines.push(ans); lines.push(""); }
+      if (ans) { lines.push(q.label); lines.push(ans); lines.push(""); }
     });
     return lines.join("\n");
   };
 
-  const copyEntry = (entry) => {
-    navigator.clipboard.writeText(buildText(entry)).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+  // טעינת EmailJS פעם אחת
+  useEffect(() => {
+    if (window.emailjs) return;
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js";
+    script.onload = () => window.emailjs.init({ publicKey: EJS_KEY });
+    document.head.appendChild(script);
+  }, []);
+
+  const sendEmail = async (entry, name) => {
+    if (sending) return;
+    if (!name.trim()) { alert("נא להזין שם לפני השליחה"); return; }
+    const hasContent = JOURNAL_QUESTIONS.some(q => (entry.answers[q.key] || "").trim());
+    if (!hasContent) { alert("נא למלא לפחות תשובה אחת לפני השליחה"); return; }
+
+    setSending(true);
+    setSendStatus(null);
+    try {
+      await window.emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+        teacher_name: name,
+        date:         entry.date,
+        content:      buildText(entry, name),
+      });
+      setSendStatus("ok");
+      // שמירה אוטומטית לאחר שליחה מוצלחת
+      const updated = [{ ...entry, sentAt: new Date().toISOString() }, ...entries];
+      setEntries(updated);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)); } catch {}
+      setCurrent({ date: todayStr(), answers: {} });
+      setTimeout(() => setSendStatus(null), 4000);
+    } catch (e) {
+      setSendStatus("err");
+      setTimeout(() => setSendStatus(null), 4000);
+    } finally {
+      setSending(false);
+    }
   };
 
   const deleteEntry = (idx) => {
@@ -690,7 +733,7 @@ function JournalMode() {
   return (
     <div style={{ maxWidth:760, margin:"0 auto", padding:"24px 18px", flex:1 }}>
 
-      {/* כותרת + טאבים */}
+      {/* טאבים */}
       <div style={{ display:"flex", gap:8, marginBottom:20 }}>
         {[{ id:"write", label:"כתיבה שבועית" }, { id:"history", label:`היסטוריה (${entries.length})` }].map(t => (
           <button key={t.id} onClick={() => setView(t.id)}
@@ -710,6 +753,23 @@ function JournalMode() {
             <div style={{ fontSize:12, color:G500, background:G100, padding:"4px 12px", borderRadius:20 }}>{current.date}</div>
           </div>
 
+          {/* שם המורה */}
+          <div style={{ marginBottom:24 }}>
+            <label style={{ display:"block", fontSize:13, fontWeight:600, color:G700, marginBottom:7 }}>
+              שם המורה
+            </label>
+            <input
+              value={teacherName}
+              onChange={e => handleNameChange(e.target.value)}
+              placeholder="הכנס את שמך המלא"
+              style={{ width:"100%", padding:"10px 13px", borderRadius:9,
+                border:`1.5px solid ${teacherName ? IND : G200}`,
+                fontSize:13, fontFamily:"inherit", direction:"rtl", outline:"none",
+                background:"#FAFBFC", color:G900, boxSizing:"border-box" }}
+            />
+          </div>
+
+          {/* שאלות */}
           {JOURNAL_QUESTIONS.map(q => (
             <div key={q.key} style={{ marginBottom:20 }}>
               <label style={{ display:"block", fontSize:13, fontWeight:600, color:G700, marginBottom:7 }}>
@@ -728,22 +788,30 @@ function JournalMode() {
             </div>
           ))}
 
-          <div style={{ display:"flex", gap:9, marginTop:8 }}>
-            <button onClick={saveEntry}
-              style={{ flex:1, padding:"12px", borderRadius:9, border:"none", background:IND,
-                color:WH, fontSize:14, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>
-              שמור רשומה
-            </button>
-            <button onClick={() => copyEntry(current)}
-              style={{ padding:"12px 20px", borderRadius:9, border:`1px solid ${G200}`,
-                background:WH, color: copied ? IND : G700, fontSize:13, fontWeight:500,
-                cursor:"pointer", fontFamily:"inherit", transition:"color 0.2s" }}>
-              {copied ? "הועתק ✓" : "העתק לשליחה"}
-            </button>
-          </div>
-          <p style={{ fontSize:11, color:G500, marginTop:10, textAlign:"center" }}>
-            לאחר ההעתקה — הדבק בווטסאפ או במייל ושלח לחוקר
-          </p>
+          {/* כפתור שליחה */}
+          <button onClick={() => sendEmail(current, teacherName)} disabled={sending}
+            style={{ width:"100%", padding:"13px", borderRadius:9, border:"none",
+              background: sending ? G200 : IND, color: sending ? G500 : WH,
+              fontSize:14, fontWeight:600, cursor: sending ? "default" : "pointer",
+              fontFamily:"inherit", transition:"background 0.15s" }}>
+            {sending ? "שולח..." : "שלח לחוקר"}
+          </button>
+
+          {/* הודעת סטטוס */}
+          {sendStatus==="ok" && (
+            <div style={{ marginTop:12, padding:"10px 16px", borderRadius:8,
+              background:"#F0FDF4", border:"1px solid #86EFAC", color:"#166534",
+              fontSize:13, textAlign:"center", fontWeight:500 }}>
+              היומן נשלח בהצלחה לחוקר
+            </div>
+          )}
+          {sendStatus==="err" && (
+            <div style={{ marginTop:12, padding:"10px 16px", borderRadius:8,
+              background:RED_BG, border:`1px solid ${RED}`, color:RED,
+              fontSize:13, textAlign:"center", fontWeight:500 }}>
+              שגיאה בשליחה — נסה שוב או בדוק חיבור לאינטרנט
+            </div>
+          )}
         </div>
       )}
 
@@ -752,26 +820,25 @@ function JournalMode() {
         <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
           {entries.length === 0 && (
             <div style={{ textAlign:"center", color:G500, padding:"60px 0", fontSize:14 }}>
-              עוד לא נשמרו רשומות
+              עוד לא נשלחו רשומות
             </div>
           )}
           {entries.map((entry, idx) => (
             <div key={idx} style={{ background:WH, borderRadius:12, border:`1px solid ${G200}`,
               padding:"20px 24px", borderTop:`3px solid ${IND}` }}>
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
-                <span style={{ fontSize:13, fontWeight:600, color:G900 }}>{entry.date}</span>
-                <div style={{ display:"flex", gap:8 }}>
-                  <button onClick={() => copyEntry(entry)}
-                    style={{ padding:"5px 14px", borderRadius:7, border:`1px solid ${G200}`,
-                      background:WH, color:G700, fontSize:12, cursor:"pointer", fontFamily:"inherit" }}>
-                    העתק לשליחה
-                  </button>
-                  <button onClick={() => deleteEntry(idx)}
-                    style={{ padding:"5px 10px", borderRadius:7, border:`1px solid ${RED_BG}`,
-                      background:RED_BG, color:RED, fontSize:12, cursor:"pointer", fontFamily:"inherit" }}>
-                    מחק
-                  </button>
+                <div>
+                  <span style={{ fontSize:13, fontWeight:600, color:G900 }}>{entry.date}</span>
+                  {entry.sentAt && (
+                    <span style={{ fontSize:11, color:"#166534", background:"#F0FDF4",
+                      padding:"2px 8px", borderRadius:10, marginRight:8 }}>נשלח ✓</span>
+                  )}
                 </div>
+                <button onClick={() => deleteEntry(idx)}
+                  style={{ padding:"5px 10px", borderRadius:7, border:`1px solid ${RED_BG}`,
+                    background:RED_BG, color:RED, fontSize:12, cursor:"pointer", fontFamily:"inherit" }}>
+                  מחק
+                </button>
               </div>
               {JOURNAL_QUESTIONS.map(q => {
                 const ans = (entry.answers[q.key] || "").trim();
