@@ -168,8 +168,82 @@ const MODES = [
   { id: "journal", label: "יומן מורה" },
 ];
 
+// ─── דף נחיתה ────────────────────────────────────────────────────────────────
+function LandingPage({ onEnter }) {
+  const features = [
+    { icon: "🧠", title: "מאמן פדגוגי", desc: "שיח אישי שמפתח חשיבה דיפרנציאלית עמוקה — שאלות סוקרטיות, אבחון כיתה, ותכנון מסלולים" },
+    { icon: "📋", title: "בונה מטלות", desc: "יוצר מטלות מובנות לפי רמות תוך דקות — עם טקסט, בלי טקסט, לכיתה או להדפסה" },
+    { icon: "📐", title: "בניית מערך שיעור", desc: "מבנה שיעור מלא עם פתיחה, עיבוד, ופעילויות — מותאם לתוכניות משרד החינוך" },
+    { icon: "📓", title: "יומן מורה", desc: "שאלון שבועי מובנה לתיעוד, הרפלקציה ושליחה אוטומטית לחוקר" },
+  ];
+
+  return (
+    <div style={{ direction:"rtl", fontFamily:"'Segoe UI','Arial Hebrew',Arial,sans-serif", minHeight:"100vh",
+      background:"linear-gradient(160deg, #1A1A2E 0%, #16213E 40%, #0F3460 100%)",
+      display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+      padding:"40px 20px", boxSizing:"border-box" }}>
+
+      {/* Badge מחקר */}
+      <div style={{ background:"rgba(79,70,229,0.25)", border:"1px solid rgba(79,70,229,0.5)",
+        borderRadius:20, padding:"5px 16px", marginBottom:24, fontSize:12, color:"#A5B4FC", fontWeight:500 }}>
+        🔬 מחקר אקדמי — פיילוט 2024–2025
+      </div>
+
+      {/* כותרת ראשית */}
+      <h1 style={{ color:"#FFFFFF", fontSize:"clamp(26px,5vw,42px)", fontWeight:800,
+        textAlign:"center", margin:"0 0 8px 0", lineHeight:1.25 }}>
+        מרחב ה-AI להוראה דיפרנציאלית
+      </h1>
+      <p style={{ color:"#94A3B8", fontSize:"clamp(14px,2.5vw,17px)", textAlign:"center",
+        margin:"0 0 48px 0", maxWidth:560, lineHeight:1.7 }}>
+        כלי AI שתוכנן במיוחד למורים במקצועות רבי-מלל בחטיבת הביניים —
+        לתכנון, בנייה ותיעוד הוראה דיפרנציאלית
+      </p>
+
+      {/* כרטיסי פיצ'רים */}
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",
+        gap:16, width:"100%", maxWidth:880, marginBottom:48 }}>
+        {features.map(f => (
+          <div key={f.title} style={{ background:"rgba(255,255,255,0.05)",
+            border:"1px solid rgba(255,255,255,0.10)", borderRadius:16,
+            padding:"24px 20px", backdropFilter:"blur(8px)",
+            transition:"transform 0.2s, background 0.2s", cursor:"default" }}
+            onMouseEnter={e => { e.currentTarget.style.background="rgba(79,70,229,0.18)"; e.currentTarget.style.transform="translateY(-3px)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,0.05)"; e.currentTarget.style.transform="translateY(0)"; }}>
+            <div style={{ fontSize:28, marginBottom:10 }}>{f.icon}</div>
+            <div style={{ color:"#E2E8F0", fontWeight:700, fontSize:15, marginBottom:6 }}>{f.title}</div>
+            <div style={{ color:"#94A3B8", fontSize:13, lineHeight:1.6 }}>{f.desc}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* כפתור כניסה */}
+      <button onClick={onEnter}
+        style={{ background:"linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
+          color:"#FFFFFF", border:"none", borderRadius:14, padding:"16px 56px",
+          fontSize:18, fontWeight:700, cursor:"pointer", fontFamily:"inherit",
+          boxShadow:"0 4px 24px rgba(79,70,229,0.45)",
+          transition:"transform 0.15s, box-shadow 0.15s" }}
+        onMouseEnter={e => { e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 8px 32px rgba(79,70,229,0.6)"; }}
+        onMouseLeave={e => { e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="0 4px 24px rgba(79,70,229,0.45)"; }}>
+        כניסה לפלטפורמה ←
+      </button>
+
+      {/* הערת תחתית */}
+      <p style={{ color:"#475569", fontSize:11, textAlign:"center", marginTop:32, lineHeight:1.6 }}>
+        מיועד למורים המשתתפים במחקר בלבד · פותח כחלק מחיבור תזה אקדמי
+      </p>
+    </div>
+  );
+}
+
+// ─── אפליקציה ראשית ──────────────────────────────────────────────────────────
 export default function App() {
   const [mode, setMode] = useState("mentor");
+  const [showLanding, setShowLanding] = useState(true);
+
+  if (showLanding) return <LandingPage onEnter={() => setShowLanding(false)} />;
+
   return (
     <div style={{ direction:"rtl", fontFamily:"'Segoe UI','Arial Hebrew',Arial,sans-serif", minHeight:"100vh", display:"flex", flexDirection:"column", background:BG }}>
       <nav style={{ background:WH, borderBottom:`1px solid ${G200}`, padding:"8px 16px", display:"flex", flexDirection:"column", alignItems:"center", gap:8, flexShrink:0 }}>
