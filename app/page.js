@@ -168,69 +168,144 @@ const MODES = [
   { id: "journal", label: "יומן מורה" },
 ];
 
+// ─── SVG Icons ────────────────────────────────────────────────────────────────
+const IconBrain = () => (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#818CF8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
+    <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>
+    <path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/>
+  </svg>
+);
+const IconTask = () => (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#818CF8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+  </svg>
+);
+const IconLesson = () => (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#818CF8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
+  </svg>
+);
+const IconJournal = () => (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#818CF8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="7" x2="16" y2="7"/><line x1="12" y1="11" x2="16" y2="11"/>
+  </svg>
+);
+
 // ─── דף נחיתה ────────────────────────────────────────────────────────────────
 function LandingPage({ onEnter }) {
   const features = [
-    { icon: "🧠", title: "מאמן פדגוגי", desc: "שיח אישי שמפתח חשיבה דיפרנציאלית עמוקה — שאלות סוקרטיות, אבחון כיתה, ותכנון מסלולים" },
-    { icon: "📋", title: "בונה מטלות", desc: "יוצר מטלות מובנות לפי רמות תוך דקות — עם טקסט, בלי טקסט, לכיתה או להדפסה" },
-    { icon: "📐", title: "בניית מערך שיעור", desc: "מבנה שיעור מלא עם פתיחה, עיבוד, ופעילויות — מותאם לתוכניות משרד החינוך" },
-    { icon: "📓", title: "יומן מורה", desc: "שאלון שבועי מובנה לתיעוד, הרפלקציה ושליחה אוטומטית לחוקר" },
+    { Icon: IconBrain,   title: "מאמן פדגוגי",       desc: "שיח אישי שמפתח חשיבה דיפרנציאלית — שאלות סוקרטיות, אבחון כיתה ותכנון מסלולים" },
+    { Icon: IconTask,    title: "בונה מטלות",          desc: "מטלות מובנות לפי רמות תוך דקות — עם טקסט או בלעדיו, לכיתה או להדפסה" },
+    { Icon: IconLesson,  title: "בניית מערך שיעור",   desc: "מבנה שיעור מלא — פתיחה, עיבוד ופעילויות, בהתאם לתוכנית משרד החינוך" },
+    { Icon: IconJournal, title: "יומן מורה",           desc: "שאלון שבועי מובנה לתיעוד ורפלקציה — נשלח אוטומטית לחוקר" },
   ];
 
   return (
-    <div style={{ direction:"rtl", fontFamily:"'Segoe UI','Arial Hebrew',Arial,sans-serif", minHeight:"100vh",
-      background:"linear-gradient(160deg, #1A1A2E 0%, #16213E 40%, #0F3460 100%)",
+    <div style={{
+      direction:"rtl", fontFamily:"'Segoe UI','Arial Hebrew',Arial,sans-serif",
+      minHeight:"100vh", overflowX:"hidden",
+      background:"linear-gradient(145deg, #0D0D1F 0%, #131332 35%, #0F1F4A 70%, #1A0E3A 100%)",
       display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
-      padding:"40px 20px", boxSizing:"border-box" }}>
+      padding:"48px 24px", boxSizing:"border-box", position:"relative",
+    }}>
 
-      {/* Badge מחקר */}
-      <div style={{ background:"rgba(79,70,229,0.25)", border:"1px solid rgba(79,70,229,0.5)",
-        borderRadius:20, padding:"5px 16px", marginBottom:24, fontSize:12, color:"#A5B4FC", fontWeight:500 }}>
-        🔬 מחקר אקדמי — פיילוט 2024–2025
+      {/* עיגולי רקע דקורטיביים */}
+      <div style={{ position:"absolute", top:"-10%", left:"-5%", width:420, height:420,
+        borderRadius:"50%", background:"radial-gradient(circle, rgba(99,77,255,0.18) 0%, transparent 70%)",
+        pointerEvents:"none" }}/>
+      <div style={{ position:"absolute", bottom:"-8%", right:"-4%", width:320, height:320,
+        borderRadius:"50%", background:"radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)",
+        pointerEvents:"none" }}/>
+
+      {/* תגית מחקר */}
+      <div style={{
+        border:"1px solid rgba(129,140,248,0.4)", borderRadius:24,
+        padding:"4px 18px", marginBottom:36, fontSize:11, letterSpacing:1.2,
+        color:"#818CF8", fontWeight:600, textTransform:"uppercase",
+        background:"rgba(79,70,229,0.12)",
+      }}>
+        מחקר אקדמי · פיילוט 2024–2025
       </div>
 
       {/* כותרת ראשית */}
-      <h1 style={{ color:"#FFFFFF", fontSize:"clamp(26px,5vw,42px)", fontWeight:800,
-        textAlign:"center", margin:"0 0 8px 0", lineHeight:1.25 }}>
-        מרחב ה-AI להוראה דיפרנציאלית
+      <h1 style={{
+        margin:"0 0 6px 0", textAlign:"center", lineHeight:1.2,
+        fontSize:"clamp(32px,6vw,58px)", fontWeight:900, color:"#FFFFFF",
+        letterSpacing:"-0.5px",
+      }}>
+        הוראה דיפרנציאלית
       </h1>
-      <p style={{ color:"#94A3B8", fontSize:"clamp(14px,2.5vw,17px)", textAlign:"center",
-        margin:"0 0 48px 0", maxWidth:560, lineHeight:1.7 }}>
-        כלי AI שתוכנן במיוחד למורים במקצועות רבי-מלל בחטיבת הביניים —
+      <h1 style={{
+        margin:"0 0 24px 0", textAlign:"center", lineHeight:1.2,
+        fontSize:"clamp(32px,6vw,58px)", fontWeight:900,
+        background:"linear-gradient(90deg, #818CF8, #C084FC)",
+        WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent",
+        letterSpacing:"-0.5px",
+      }}>
+        מופעלת על ידי AI
+      </h1>
+
+      {/* תת-כותרת */}
+      <p style={{
+        color:"#94A3B8", fontSize:"clamp(14px,2vw,17px)", textAlign:"center",
+        margin:"0 0 52px 0", maxWidth:520, lineHeight:1.8, fontWeight:400,
+      }}>
+        כלי AI שתוכנן למורים במקצועות רבי-מלל בחטיבת הביניים —
         לתכנון, בנייה ותיעוד הוראה דיפרנציאלית
       </p>
 
       {/* כרטיסי פיצ'רים */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",
-        gap:16, width:"100%", maxWidth:880, marginBottom:48 }}>
-        {features.map(f => (
-          <div key={f.title} style={{ background:"rgba(255,255,255,0.05)",
-            border:"1px solid rgba(255,255,255,0.10)", borderRadius:16,
-            padding:"24px 20px", backdropFilter:"blur(8px)",
-            transition:"transform 0.2s, background 0.2s", cursor:"default" }}
-            onMouseEnter={e => { e.currentTarget.style.background="rgba(79,70,229,0.18)"; e.currentTarget.style.transform="translateY(-3px)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,0.05)"; e.currentTarget.style.transform="translateY(0)"; }}>
-            <div style={{ fontSize:28, marginBottom:10 }}>{f.icon}</div>
-            <div style={{ color:"#E2E8F0", fontWeight:700, fontSize:15, marginBottom:6 }}>{f.title}</div>
-            <div style={{ color:"#94A3B8", fontSize:13, lineHeight:1.6 }}>{f.desc}</div>
+      <div style={{
+        display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(210px,1fr))",
+        gap:14, width:"100%", maxWidth:900, marginBottom:52,
+      }}>
+        {features.map(({ Icon, title, desc }) => (
+          <div key={title} style={{
+            background:"rgba(255,255,255,0.04)",
+            border:"1px solid rgba(129,140,248,0.18)",
+            borderRadius:18, padding:"26px 20px",
+            transition:"transform 0.2s, border-color 0.2s, background 0.2s",
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.transform="translateY(-4px)";
+            e.currentTarget.style.borderColor="rgba(129,140,248,0.55)";
+            e.currentTarget.style.background="rgba(79,70,229,0.14)";
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.transform="translateY(0)";
+            e.currentTarget.style.borderColor="rgba(129,140,248,0.18)";
+            e.currentTarget.style.background="rgba(255,255,255,0.04)";
+          }}>
+            <div style={{ marginBottom:14 }}><Icon/></div>
+            <div style={{ color:"#E2E8F0", fontWeight:700, fontSize:15, marginBottom:8 }}>{title}</div>
+            <div style={{ color:"#64748B", fontSize:13, lineHeight:1.7 }}>{desc}</div>
           </div>
         ))}
       </div>
 
       {/* כפתור כניסה */}
-      <button onClick={onEnter}
-        style={{ background:"linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
-          color:"#FFFFFF", border:"none", borderRadius:14, padding:"16px 56px",
-          fontSize:18, fontWeight:700, cursor:"pointer", fontFamily:"inherit",
-          boxShadow:"0 4px 24px rgba(79,70,229,0.45)",
-          transition:"transform 0.15s, box-shadow 0.15s" }}
-        onMouseEnter={e => { e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 8px 32px rgba(79,70,229,0.6)"; }}
-        onMouseLeave={e => { e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="0 4px 24px rgba(79,70,229,0.45)"; }}>
-        כניסה לפלטפורמה ←
+      <button onClick={onEnter} style={{
+        background:"linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
+        color:"#FFFFFF", border:"none", borderRadius:14,
+        padding:"15px 60px", fontSize:17, fontWeight:700,
+        cursor:"pointer", fontFamily:"inherit",
+        boxShadow:"0 4px 28px rgba(79,70,229,0.5)",
+        transition:"transform 0.15s, box-shadow 0.15s", letterSpacing:"0.3px",
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.transform="translateY(-2px)";
+        e.currentTarget.style.boxShadow="0 8px 36px rgba(79,70,229,0.7)";
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform="translateY(0)";
+        e.currentTarget.style.boxShadow="0 4px 28px rgba(79,70,229,0.5)";
+      }}>
+        כניסה לפלטפורמה
       </button>
 
-      {/* הערת תחתית */}
-      <p style={{ color:"#475569", fontSize:11, textAlign:"center", marginTop:32, lineHeight:1.6 }}>
+      {/* תחתית */}
+      <p style={{ color:"#334155", fontSize:11, textAlign:"center", marginTop:32 }}>
         מיועד למורים המשתתפים במחקר בלבד · פותח כחלק מחיבור תזה אקדמי
       </p>
     </div>
