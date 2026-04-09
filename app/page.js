@@ -634,17 +634,35 @@ const EJS_SERVICE  = "service_j8uclds";
 const EJS_TEMPLATE = "template_be2fy9j";
 const EJS_KEY      = "0rPmh-xVzTSaExJ1X";
 
+const JOURNAL_CHECKBOXES = [
+  { key: "cb1", label: "התאמת טקסטים לרמות קריאה שונות" },
+  { key: "cb2", label: "יצירת משימות ברמות קושי מגוונות" },
+  { key: "cb3", label: "פיתוח חומרי למידה מותאמים אישית" },
+  { key: "cb4", label: "ניסוח שאלות בהתאם לטקסונומיות שונות" },
+  { key: "cb5", label: "תכנון פעילויות לסגנונות למידה מגוונים" },
+];
+
 const JOURNAL_QUESTIONS = [
-  { key: "q1", label: "מה ניסיתי השבוע עם הצ'אטבוט?",          placeholder: "תאר את הפעילות שביצעת..." },
-  { key: "q2", label: "מה עבד טוב?",                             placeholder: "רגעים מוצלחים, תגובות מפתיעות של תלמידים..." },
-  { key: "q3", label: "מה היה קשה או לא עבד?",                  placeholder: "קשיים שנתקלת בהם, מה לא הלך כמצופה..." },
-  { key: "q4", label: "מה למדתי השבוע על הוראה דיפרנציאלית?",   placeholder: "תובנות חדשות, שינוי בתפיסה..." },
-  { key: "q5", label: "מה אני רוצה לנסות בשבוע הבא?",           placeholder: "רעיונות לשיפור, ניסויים חדשים..." },
+  { key: "q1", section: "תיאור הפעילות",       label: "באילו שיעורים השתמשת בצ'אטבוט השבוע?",                                          placeholder: "נושאים, כיתות..." },
+  { key: "q2", section: "הצלחות ואתגרים",      label: "מה עבד היטב בשימוש בצ'אטבוט השבוע?",                                            placeholder: "" },
+  { key: "q3", section: "הצלחות ואתגרים",      label: "עם אילו אתגרים או קשיים נתקלת בשימוש בצ'אטבוט?",                               placeholder: "" },
+  { key: "q4", section: "הצלחות ואתגרים",      label: "כיצד התמודדת עם האתגרים?",                                                       placeholder: "" },
+  { key: "q5", section: "תגובות והשפעות",      label: "כיצד השפיע השימוש בצ'אטבוט על יכולתך ליישם הוראה דיפרנציאלית?",               placeholder: "" },
+  { key: "q6", section: "תגובות והשפעות",      label: "האם הבחנת בשינוי במעורבות / הישגים של התלמידים? פרט/י",                        placeholder: "" },
+  { key: "q7", section: "תובנות והחלטות",      label: "אילו תובנות חדשות קיבלת השבוע על שילוב צ'אטבוט בהוראה דיפרנציאלית?",           placeholder: "" },
+  { key: "q8", section: "תובנות והחלטות",      label: "כיצד את/ה מתכנן/ת לשפר את השימוש בצ'אטבוט בשבוע הבא?",                        placeholder: "" },
+  { key: "q9", section: "דוגמה משמעותית",      label: "תאר/י מקרה אחד ספציפי מהשבוע — האתגר, כיצד השתמשת בצ'אטבוט, התוצאה:",        placeholder: "" },
+  { key: "q10", section: "הערות נוספות",       label: "הערות נוספות",                                                                    placeholder: "" },
 ];
 
 function JournalMode() {
   const STORAGE_KEY      = "teacher_journal";
   const TEACHER_NAME_KEY = "teacher_name";
+
+  const emptyForm = () => ({
+    subject: "", grade: "", weekNum: "", dateFrom: "", dateTo: "",
+    checkboxes: {}, cbOther: "", answers: {},
+  });
 
   const loadEntries = () => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
@@ -654,39 +672,55 @@ function JournalMode() {
   const [teacherName, setTeacherName] = useState(() => {
     try { return localStorage.getItem(TEACHER_NAME_KEY) || ""; } catch { return ""; }
   });
-  const [current,  setCurrent]  = useState({ date: todayStr(), answers: {} });
-  const [view,     setView]     = useState("write");
-  const [sending,  setSending]  = useState(false);
-  const [sendStatus, setSendStatus] = useState(null); // "ok" | "err"
+  const [current,    setCurrent]    = useState(emptyForm());
+  const [view,       setView]       = useState("write");
+  const [sending,    setSending]    = useState(false);
+  const [sendStatus, setSendStatus] = useState(null);
 
-  function todayStr() {
-    return new Date().toLocaleDateString("he-IL", { day:"2-digit", month:"2-digit", year:"numeric" });
-  }
-
-  // שמירת שם המורה ב-localStorage
   const handleNameChange = (val) => {
     setTeacherName(val);
     try { localStorage.setItem(TEACHER_NAME_KEY, val); } catch {}
   };
 
-  const setAnswer = (key, val) =>
-    setCurrent(c => ({ ...c, answers: { ...c.answers, [key]: val } }));
+  const setField  = (key, val) => setCurrent(c => ({ ...c, [key]: val }));
+  const setAnswer = (key, val) => setCurrent(c => ({ ...c, answers: { ...c.answers, [key]: val } }));
+  const toggleCb  = (key)      => setCurrent(c => ({ ...c, checkboxes: { ...c.checkboxes, [key]: !c.checkboxes[key] } }));
 
   const buildText = (entry, name) => {
+    const checkedLabels = JOURNAL_CHECKBOXES.filter(cb => entry.checkboxes[cb.key]).map(cb => `• ${cb.label}`);
+    if (entry.cbOther?.trim()) checkedLabels.push(`• אחר: ${entry.cbOther.trim()}`);
     const lines = [
-      `יומן מורה שבועי`,
+      "יומן מעקב שבועי למורה המשתתף",
+      "─────────────────────────────",
       `שם המורה: ${name || "לא צוין"}`,
-      `תאריך: ${entry.date}`,
+      `מקצוע: ${entry.subject || "—"}`,
+      `שכבת גיל: ${entry.grade || "—"}`,
+      `שבוע מספר: ${entry.weekNum || "—"}   תאריכים: ${entry.dateFrom || "—"} עד ${entry.dateTo || "—"}`,
       "",
+      "א. תיאור הפעילות",
+      "─────────────────",
     ];
-    JOURNAL_QUESTIONS.forEach(q => {
+    JOURNAL_QUESTIONS.forEach((q, i) => {
       const ans = (entry.answers[q.key] || "").trim();
-      if (ans) { lines.push(q.label); lines.push(ans); lines.push(""); }
+      const prevSection = i > 0 ? JOURNAL_QUESTIONS[i-1].section : "";
+      if (q.section !== prevSection && q.section !== "תיאור הפעילות") {
+        lines.push(""); lines.push(q.section); lines.push("─────────────────");
+      }
+      if (q.key === "q1") {
+        lines.push(q.label); lines.push(ans || "—"); lines.push("");
+        lines.push("ב. לאילו מטרות הוראה דיפרנציאלית השתמשת בצ'אטבוט?");
+        if (checkedLabels.length) checkedLabels.forEach(l => lines.push(l));
+        else lines.push("לא סומן");
+        lines.push("");
+      } else {
+        lines.push(q.label); lines.push(ans || "—"); lines.push("");
+      }
     });
+    lines.push("─────────────────────────────");
+    lines.push("היומן הינו כלי מחקרי. תודה על שיתוף הפעולה!");
     return lines.join("\n");
   };
 
-  // טעינת EmailJS פעם אחת
   useEffect(() => {
     if (window.emailjs) return;
     const script = document.createElement("script");
@@ -695,33 +729,29 @@ function JournalMode() {
     document.head.appendChild(script);
   }, []);
 
-  const sendEmail = async (entry, name) => {
+  const sendEmail = async () => {
     if (sending) return;
-    if (!name.trim()) { alert("נא להזין שם לפני השליחה"); return; }
-    const hasContent = JOURNAL_QUESTIONS.some(q => (entry.answers[q.key] || "").trim());
+    if (!teacherName.trim()) { alert("נא להזין שם מורה לפני השליחה"); return; }
+    const hasContent = JOURNAL_QUESTIONS.some(q => (current.answers[q.key] || "").trim());
     if (!hasContent) { alert("נא למלא לפחות תשובה אחת לפני השליחה"); return; }
-
-    setSending(true);
-    setSendStatus(null);
+    setSending(true); setSendStatus(null);
+    const dateLabel = new Date().toLocaleDateString("he-IL", { day:"2-digit", month:"2-digit", year:"numeric" });
     try {
       await window.emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
-        teacher_name: name,
-        date:         entry.date,
-        content:      buildText(entry, name),
+        teacher_name: teacherName,
+        date:         `שבוע ${current.weekNum || "?"} — ${current.dateFrom || ""} עד ${current.dateTo || ""}`,
+        content:      buildText(current, teacherName),
       });
       setSendStatus("ok");
-      // שמירה אוטומטית לאחר שליחה מוצלחת
-      const updated = [{ ...entry, sentAt: new Date().toISOString() }, ...entries];
+      const updated = [{ ...current, date: dateLabel, sentAt: new Date().toISOString() }, ...entries];
       setEntries(updated);
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)); } catch {}
-      setCurrent({ date: todayStr(), answers: {} });
-      setTimeout(() => setSendStatus(null), 4000);
-    } catch (e) {
+      setCurrent(emptyForm());
+      setTimeout(() => setSendStatus(null), 5000);
+    } catch {
       setSendStatus("err");
-      setTimeout(() => setSendStatus(null), 4000);
-    } finally {
-      setSending(false);
-    }
+      setTimeout(() => setSendStatus(null), 5000);
+    } finally { setSending(false); }
   };
 
   const deleteEntry = (idx) => {
@@ -730,12 +760,21 @@ function JournalMode() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)); } catch {}
   };
 
+  const inpStyle = { width:"100%", padding:"9px 12px", borderRadius:8, border:`1px solid ${G200}`,
+    fontSize:13, fontFamily:"inherit", direction:"rtl", outline:"none",
+    background:"#FAFBFC", color:G900, boxSizing:"border-box" };
+
+  const sectionHeader = (label) => (
+    <div style={{ fontSize:13, fontWeight:700, color:IND, borderBottom:`2px solid ${IND_L}`,
+      paddingBottom:6, marginBottom:16, marginTop:28 }}>{label}</div>
+  );
+
   return (
     <div style={{ maxWidth:760, margin:"0 auto", padding:"24px 18px", flex:1 }}>
 
       {/* טאבים */}
       <div style={{ display:"flex", gap:8, marginBottom:20 }}>
-        {[{ id:"write", label:"כתיבה שבועית" }, { id:"history", label:`היסטוריה (${entries.length})` }].map(t => (
+        {[{ id:"write", label:"יומן שבועי" }, { id:"history", label:`היסטוריה (${entries.length})` }].map(t => (
           <button key={t.id} onClick={() => setView(t.id)}
             style={{ padding:"7px 18px", borderRadius:8, border:`1.5px solid ${view===t.id ? IND : G200}`,
               background: view===t.id ? IND_L : WH, color: view===t.id ? IND : G500,
@@ -745,59 +784,125 @@ function JournalMode() {
         ))}
       </div>
 
-      {/* מסך כתיבה */}
       {view==="write" && (
         <div style={{ background:WH, borderRadius:14, border:`1px solid ${G200}`, padding:"28px 32px" }}>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:22 }}>
-            <h2 style={{ margin:0, fontSize:16, fontWeight:600, color:G900 }}>יומן שבועי</h2>
-            <div style={{ fontSize:12, color:G500, background:G100, padding:"4px 12px", borderRadius:20 }}>{current.date}</div>
-          </div>
+          <h2 style={{ margin:"0 0 20px", fontSize:16, fontWeight:600, color:G900 }}>
+            יומן מעקב שבועי למורה המשתתף
+          </h2>
 
-          {/* שם המורה */}
-          <div style={{ marginBottom:24 }}>
-            <label style={{ display:"block", fontSize:13, fontWeight:600, color:G700, marginBottom:7 }}>
-              שם המורה
-            </label>
-            <input
-              value={teacherName}
-              onChange={e => handleNameChange(e.target.value)}
-              placeholder="הכנס את שמך המלא"
-              style={{ width:"100%", padding:"10px 13px", borderRadius:9,
-                border:`1.5px solid ${teacherName ? IND : G200}`,
-                fontSize:13, fontFamily:"inherit", direction:"rtl", outline:"none",
-                background:"#FAFBFC", color:G900, boxSizing:"border-box" }}
-            />
-          </div>
-
-          {/* שאלות */}
-          {JOURNAL_QUESTIONS.map(q => (
-            <div key={q.key} style={{ marginBottom:20 }}>
-              <label style={{ display:"block", fontSize:13, fontWeight:600, color:G700, marginBottom:7 }}>
-                {q.label}
-              </label>
-              <textarea
-                value={current.answers[q.key] || ""}
-                onChange={e => setAnswer(q.key, e.target.value)}
-                placeholder={q.placeholder}
-                rows={3}
-                style={{ width:"100%", padding:"10px 13px", borderRadius:9, border:`1px solid ${G200}`,
-                  fontSize:13, fontFamily:"inherit", direction:"rtl", outline:"none",
-                  lineHeight:1.7, resize:"vertical", background:"#FAFBFC", color:G900,
-                  boxSizing:"border-box" }}
-              />
+          {/* פרטים כלליים */}
+          {sectionHeader("פרטים כלליים")}
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:12 }}>
+            <div>
+              <label style={{ display:"block", fontSize:12, fontWeight:600, color:G500, marginBottom:5 }}>שם המורה</label>
+              <input value={teacherName} onChange={e => handleNameChange(e.target.value)}
+                placeholder="שם מלא" style={{ ...inpStyle, border:`1.5px solid ${teacherName ? IND : G200}` }}/>
             </div>
-          ))}
+            <div>
+              <label style={{ display:"block", fontSize:12, fontWeight:600, color:G500, marginBottom:5 }}>מקצוע</label>
+              <input value={current.subject} onChange={e => setField("subject", e.target.value)}
+                placeholder="לדוגמה: היסטוריה" style={inpStyle}/>
+            </div>
+            <div>
+              <label style={{ display:"block", fontSize:12, fontWeight:600, color:G500, marginBottom:5 }}>שכבת גיל</label>
+              <input value={current.grade} onChange={e => setField("grade", e.target.value)}
+                placeholder="לדוגמה: כיתות ח'" style={inpStyle}/>
+            </div>
+            <div>
+              <label style={{ display:"block", fontSize:12, fontWeight:600, color:G500, marginBottom:5 }}>שבוע מספר</label>
+              <input value={current.weekNum} onChange={e => setField("weekNum", e.target.value)}
+                placeholder="1" type="number" style={inpStyle}/>
+            </div>
+            <div>
+              <label style={{ display:"block", fontSize:12, fontWeight:600, color:G500, marginBottom:5 }}>מתאריך</label>
+              <input value={current.dateFrom} onChange={e => setField("dateFrom", e.target.value)}
+                type="date" style={inpStyle}/>
+            </div>
+            <div>
+              <label style={{ display:"block", fontSize:12, fontWeight:600, color:G500, marginBottom:5 }}>עד תאריך</label>
+              <input value={current.dateTo} onChange={e => setField("dateTo", e.target.value)}
+                type="date" style={inpStyle}/>
+            </div>
+          </div>
+
+          {/* שאלה א' */}
+          {sectionHeader("תיאור הפעילות")}
+          <div style={{ marginBottom:16 }}>
+            <label style={{ display:"block", fontSize:13, fontWeight:600, color:G700, marginBottom:7 }}>
+              א. באילו שיעורים השתמשת בצ'אטבוט השבוע? (נושאים, כיתות)
+            </label>
+            <textarea value={current.answers["q1"] || ""} onChange={e => setAnswer("q1", e.target.value)}
+              rows={3} style={{ ...inpStyle, resize:"vertical", lineHeight:1.7 }}/>
+          </div>
+
+          {/* צ'קבוקסים */}
+          <div style={{ marginBottom:20 }}>
+            <label style={{ display:"block", fontSize:13, fontWeight:600, color:G700, marginBottom:10 }}>
+              ב. לאילו מטרות הוראה דיפרנציאלית השתמשת בצ'אטבוט? (סמן את כל האפשרויות)
+            </label>
+            {JOURNAL_CHECKBOXES.map(cb => (
+              <label key={cb.key} onClick={() => toggleCb(cb.key)}
+                style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10, cursor:"pointer" }}>
+                <div style={{ width:18, height:18, borderRadius:4, flexShrink:0,
+                  border:`2px solid ${current.checkboxes[cb.key] ? IND : G200}`,
+                  background: current.checkboxes[cb.key] ? IND : WH,
+                  display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  {current.checkboxes[cb.key] && (
+                    <svg width="10" height="10" viewBox="0 0 10 10">
+                      <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                  )}
+                </div>
+                <span style={{ fontSize:13, color:G700 }}>{cb.label}</span>
+              </label>
+            ))}
+            <div style={{ display:"flex", alignItems:"center", gap:10, marginTop:4 }}>
+              <div style={{ width:18, height:18, borderRadius:4, flexShrink:0,
+                border:`2px solid ${current.cbOther ? IND : G200}`,
+                background: current.cbOther ? IND : WH,
+                display:"flex", alignItems:"center", justifyContent:"center" }}>
+                {current.cbOther && (
+                  <svg width="10" height="10" viewBox="0 0 10 10">
+                    <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                )}
+              </div>
+              <span style={{ fontSize:13, color:G700, flexShrink:0 }}>אחר:</span>
+              <input value={current.cbOther} onChange={e => setField("cbOther", e.target.value)}
+                placeholder="פרט..." style={{ ...inpStyle, flex:1 }}/>
+            </div>
+          </div>
+
+          {/* שאר השאלות לפי סעיפים */}
+          {(() => {
+            let lastSection = "";
+            return JOURNAL_QUESTIONS.slice(1).map(q => {
+              const showHeader = q.section !== lastSection;
+              lastSection = q.section;
+              return (
+                <div key={q.key}>
+                  {showHeader && sectionHeader(q.section)}
+                  <div style={{ marginBottom:16 }}>
+                    <label style={{ display:"block", fontSize:13, fontWeight:600, color:G700, marginBottom:7 }}>
+                      {q.label}
+                    </label>
+                    <textarea value={current.answers[q.key] || ""} onChange={e => setAnswer(q.key, e.target.value)}
+                      rows={3} style={{ ...inpStyle, resize:"vertical", lineHeight:1.7 }}/>
+                  </div>
+                </div>
+              );
+            });
+          })()}
 
           {/* כפתור שליחה */}
-          <button onClick={() => sendEmail(current, teacherName)} disabled={sending}
-            style={{ width:"100%", padding:"13px", borderRadius:9, border:"none",
+          <button onClick={sendEmail} disabled={sending}
+            style={{ width:"100%", padding:"13px", borderRadius:9, border:"none", marginTop:8,
               background: sending ? G200 : IND, color: sending ? G500 : WH,
               fontSize:14, fontWeight:600, cursor: sending ? "default" : "pointer",
               fontFamily:"inherit", transition:"background 0.15s" }}>
             {sending ? "שולח..." : "שלח לחוקר"}
           </button>
 
-          {/* הודעת סטטוס */}
           {sendStatus==="ok" && (
             <div style={{ marginTop:12, padding:"10px 16px", borderRadius:8,
               background:"#F0FDF4", border:"1px solid #86EFAC", color:"#166534",
@@ -820,18 +925,20 @@ function JournalMode() {
         <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
           {entries.length === 0 && (
             <div style={{ textAlign:"center", color:G500, padding:"60px 0", fontSize:14 }}>
-              עוד לא נשלחו רשומות
+              עוד לא נשלחו יומנים
             </div>
           )}
           {entries.map((entry, idx) => (
             <div key={idx} style={{ background:WH, borderRadius:12, border:`1px solid ${G200}`,
               padding:"20px 24px", borderTop:`3px solid ${IND}` }}>
-              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
-                <div>
-                  <span style={{ fontSize:13, fontWeight:600, color:G900 }}>{entry.date}</span>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                  <span style={{ fontSize:13, fontWeight:600, color:G900 }}>
+                    שבוע {entry.weekNum || "?"} — {entry.date}
+                  </span>
                   {entry.sentAt && (
                     <span style={{ fontSize:11, color:"#166534", background:"#F0FDF4",
-                      padding:"2px 8px", borderRadius:10, marginRight:8 }}>נשלח ✓</span>
+                      padding:"2px 8px", borderRadius:10 }}>נשלח ✓</span>
                   )}
                 </div>
                 <button onClick={() => deleteEntry(idx)}
@@ -840,16 +947,10 @@ function JournalMode() {
                   מחק
                 </button>
               </div>
-              {JOURNAL_QUESTIONS.map(q => {
-                const ans = (entry.answers[q.key] || "").trim();
-                if (!ans) return null;
-                return (
-                  <div key={q.key} style={{ marginBottom:12 }}>
-                    <div style={{ fontSize:11, fontWeight:600, color:IND, marginBottom:3 }}>{q.label}</div>
-                    <div style={{ fontSize:13, color:G700, lineHeight:1.7, whiteSpace:"pre-wrap" }}>{ans}</div>
-                  </div>
-                );
-              })}
+              <div style={{ fontSize:12, color:G500 }}>
+                {entry.subject && `מקצוע: ${entry.subject}`}
+                {entry.grade && ` | שכבה: ${entry.grade}`}
+              </div>
             </div>
           ))}
         </div>
