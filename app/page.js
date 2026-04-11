@@ -231,7 +231,7 @@ function LandingPage({ onEnter }) {
         color:"#818CF8", fontWeight:600, textTransform:"uppercase",
         background:"rgba(79,70,229,0.12)",
       }}>
-        מחקר אקדמי · פיילוט 2024–2025
+        מחקר אקדמי · פיילוט 2025–2026
       </div>
 
       {/* כותרת ראשית */}
