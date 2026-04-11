@@ -476,7 +476,7 @@ function ChatMode({ systemPrompt, greeting, chips, startLabel, senderLabel }) {
     <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"16px" }}>
       <div style={{ background:WH, borderRadius:18, border:`1px solid ${G200}`,
         padding:"clamp(24px, 5vw, 52px) clamp(20px, 5vw, 48px)", maxWidth:680, width:"100%", textAlign:"center" }}>
-        <img src="/Untitled design.png" alt="לוגו" style={{ height:90, width:"auto", objectFit:"contain", marginBottom:20 }}/>
+        <img src="/LOGO TOMER.png" alt="לוגו" style={{ height:90, width:"auto", objectFit:"contain", marginBottom:20 }}/>
 
         {/* FIX 1: Chips — מציג תכונות הכלי לפני הפעלה */}
         {chips && chips.length > 0 && (
