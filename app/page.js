@@ -229,7 +229,7 @@ function LandingPage({ onEnter }) {
         <img
           src="/Untitled%20design.png"
           alt="הוראה דיפרנציאלית"
-          style={{ width:"clamp(130px,18vw,180px)", marginBottom:16 }}
+          style={{ width:"clamp(130px,18vw,180px)", marginBottom:16, mixBlendMode:"screen" }}
         />
 
         {/* תגית מחקר — קטנה ועדינה */}
