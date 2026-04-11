@@ -218,6 +218,13 @@ function LandingPage({ onEnter }) {
         borderRadius:"50%", background:"radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)",
         pointerEvents:"none" }}/>
 
+      {/* לוגו */}
+      <img
+        src="/Untitled%20design.png"
+        alt="הוראה דיפרנציאלית"
+        style={{ width:"clamp(140px,22vw,200px)", marginBottom:20, filter:"drop-shadow(0 4px 24px rgba(129,140,248,0.25))" }}
+      />
+
       {/* תגית מחקר */}
       <div style={{
         border:"1px solid rgba(129,140,248,0.4)", borderRadius:24,
@@ -249,9 +256,9 @@ function LandingPage({ onEnter }) {
       {/* תת-כותרת */}
       <p style={{
         color:"#94A3B8", fontSize:"clamp(14px,2vw,17px)", textAlign:"center",
-        margin:"0 0 52px 0", maxWidth:520, lineHeight:1.8, fontWeight:400,
+        margin:"0 0 52px 0", maxWidth:540, lineHeight:1.8, fontWeight:400,
       }}>
-        כלי AI שתוכנן למורים במקצועות רבי-מלל בחטיבת הביניים —
+        כלי AI שתוכנן למורים במקצועות רבי-מלל בחטיבת הביניים ובחטיבה העליונה —
         לתכנון, בנייה ותיעוד הוראה דיפרנציאלית
       </p>
 
