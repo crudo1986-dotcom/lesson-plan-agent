@@ -170,23 +170,23 @@ const MODES = [
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
 const IconBrain = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2D5F8A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7EC8E3" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="3"/>
     <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
   </svg>
 );
 const IconTask = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2D5F8A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7EC8E3" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
   </svg>
 );
 const IconLesson = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2D5F8A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7EC8E3" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
   </svg>
 );
 const IconJournal = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2D5F8A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7EC8E3" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="7" x2="16" y2="7"/><line x1="12" y1="11" x2="16" y2="11"/>
   </svg>
 );
@@ -200,16 +200,16 @@ function LandingPage({ onEnter }) {
     { Icon: IconJournal, title: "יומן מורה",           desc: "שאלון שבועי מובנה לתיעוד ורפלקציה, נשלח אוטומטית לחוקר" },
   ];
 
-  /* פלטת Light Mode — לבן/אפור מקצועי */
-  const BG_PAGE = "#F5F6F8";
-  const BG_CARD = "#FFFFFF";
-  const BD_CARD = "#E2E6EC";
-  const TXT_HI  = "#1A202C";
-  const TXT_LO  = "#64748B";
-  const ACCENT  = "#2D5F8A";
-  const ACCENT_L= "#3B7AB5";
-  const BADGE_BG= "#EBF2F8";
-  const BADGE_TXT= "#2D5F8A";
+  /* פלטת Dark Navy — תואמת לגוון הלוגו */
+  const BG_PAGE = "#132338";
+  const BG_CARD = "#1A3050";
+  const BD_CARD = "#1E3D60";
+  const TXT_HI  = "#F0F4F8";
+  const TXT_LO  = "#7EA8C4";
+  const ACCENT  = "#4A90C4";
+  const ACCENT_L= "#5BA3D8";
+  const BADGE_BG= "rgba(74,144,196,0.12)";
+  const BADGE_TXT= "#7EC8E3";
 
   return (
     <>
