@@ -170,23 +170,23 @@ const MODES = [
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
 const IconBrain = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#818CF8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2D5F8A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="3"/>
     <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
   </svg>
 );
 const IconTask = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#818CF8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2D5F8A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
   </svg>
 );
 const IconLesson = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#818CF8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2D5F8A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
   </svg>
 );
 const IconJournal = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#818CF8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2D5F8A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="7" x2="16" y2="7"/><line x1="12" y1="11" x2="16" y2="11"/>
   </svg>
 );
@@ -200,60 +200,59 @@ function LandingPage({ onEnter }) {
     { Icon: IconJournal, title: "יומן מורה",           desc: "שאלון שבועי מובנה לתיעוד ורפלקציה, נשלח אוטומטית לחוקר" },
   ];
 
-  /* צבעי Slate-Navy — מקצועי ואקדמי */
-  const NAVY   = "#0B1628";
-  const NAVY2  = "#0F1E38";
-  const NAVY3  = "#132240";
-  const SLATE  = "#4A7FA5";   /* כחול-ציפחה להדגשות */
-  const SLATE_L= "#6B9FC4";
-  const CARD_BG= "#111E35";   /* כרטיסיות אטומות */
-  const CARD_BD= "#1E3352";   /* border כרטיסיות */
-  const TXT_HI = "#E8EEF4";   /* טקסט ראשי */
-  const TXT_LO = "#6B8BA4";   /* טקסט משני */
+  /* פלטת Light Mode — לבן/אפור מקצועי */
+  const BG_PAGE = "#F5F6F8";
+  const BG_CARD = "#FFFFFF";
+  const BD_CARD = "#E2E6EC";
+  const TXT_HI  = "#1A202C";
+  const TXT_LO  = "#64748B";
+  const ACCENT  = "#2D5F8A";
+  const ACCENT_L= "#3B7AB5";
+  const BADGE_BG= "#EBF2F8";
+  const BADGE_TXT= "#2D5F8A";
 
   return (
     <>
-      {/* טעינת גופן Heebo */}
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;900&display=swap');`}</style>
 
       <div style={{
         direction:"rtl",
         fontFamily:"'Heebo','Arial Hebrew',Arial,sans-serif",
         minHeight:"100vh", overflowX:"hidden",
-        background:`linear-gradient(160deg, ${NAVY} 0%, ${NAVY2} 50%, ${NAVY3} 100%)`,
+        background:BG_PAGE,
         display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
         padding:"48px 24px", boxSizing:"border-box",
       }}>
 
-        {/* לוגו */}
+        {/* לוגו — מוצג טבעי על רקע בהיר */}
         <img
           src="/Untitled%20design.png"
           alt="הוראה דיפרנציאלית"
-          style={{ width:"clamp(130px,18vw,180px)", marginBottom:16, filter:"brightness(0) invert(1)", opacity:0.9 }}
+          style={{ width:"clamp(160px,22vw,220px)", marginBottom:20 }}
         />
 
-        {/* תגית מחקר — קטנה ועדינה */}
+        {/* תגית מחקר */}
         <div style={{
-          border:`1px solid ${CARD_BD}`, borderRadius:20,
+          border:`1px solid ${BD_CARD}`, borderRadius:20,
           padding:"3px 14px", marginBottom:28, fontSize:10.5, letterSpacing:1,
-          color:SLATE_L, fontWeight:600, textTransform:"uppercase",
-          background:"rgba(74,127,165,0.08)",
+          color:BADGE_TXT, fontWeight:600, textTransform:"uppercase",
+          background:BADGE_BG,
         }}>
           מחקר אקדמי · פיילוט 2025–2026
         </div>
 
-        {/* כותרת ראשית — ללא גרדיאנט, ללא glow */}
+        {/* כותרת ראשית */}
         <h1 style={{
           margin:"0 0 4px 0", textAlign:"center", lineHeight:1.15,
-          fontSize:"clamp(30px,5.5vw,54px)", fontWeight:900, color:TXT_HI,
+          fontSize:"clamp(30px,5.5vw,52px)", fontWeight:900, color:TXT_HI,
           letterSpacing:"-0.5px", fontFamily:"'Heebo',sans-serif",
         }}>
           הוראה דיפרנציאלית
         </h1>
         <h1 style={{
           margin:"0 0 20px 0", textAlign:"center", lineHeight:1.15,
-          fontSize:"clamp(30px,5.5vw,54px)", fontWeight:900,
-          color:SLATE_L,
+          fontSize:"clamp(30px,5.5vw,52px)", fontWeight:900,
+          color:ACCENT,
           letterSpacing:"-0.5px", fontFamily:"'Heebo',sans-serif",
         }}>
           מופעלת על ידי AI
@@ -268,25 +267,28 @@ function LandingPage({ onEnter }) {
           לתכנון, בנייה ותיעוד הוראה דיפרנציאלית
         </p>
 
-        {/* כרטיסי פיצ'רים — אטומות עם border ברור */}
+        {/* כרטיסי פיצ'רים */}
         <div style={{
           display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(210px,1fr))",
           gap:14, width:"100%", maxWidth:900, marginBottom:48,
         }}>
           {features.map(({ Icon, title, desc }) => (
             <div key={title} style={{
-              background:CARD_BG,
-              border:`1px solid ${CARD_BD}`,
+              background:BG_CARD,
+              border:`1px solid ${BD_CARD}`,
               borderRadius:16, padding:"28px 22px",
-              transition:"transform 0.2s, border-color 0.2s",
+              boxShadow:"0 1px 4px rgba(0,0,0,0.06)",
+              transition:"transform 0.2s, box-shadow 0.2s, border-color 0.2s",
             }}
             onMouseEnter={e => {
               e.currentTarget.style.transform="translateY(-4px)";
-              e.currentTarget.style.borderColor=SLATE;
+              e.currentTarget.style.boxShadow="0 8px 24px rgba(45,95,138,0.12)";
+              e.currentTarget.style.borderColor=ACCENT_L;
             }}
             onMouseLeave={e => {
               e.currentTarget.style.transform="translateY(0)";
-              e.currentTarget.style.borderColor=CARD_BD;
+              e.currentTarget.style.boxShadow="0 1px 4px rgba(0,0,0,0.06)";
+              e.currentTarget.style.borderColor=BD_CARD;
             }}>
               <div style={{ marginBottom:14 }}><Icon/></div>
               <div style={{ color:TXT_HI, fontWeight:700, fontSize:15, marginBottom:8, fontFamily:"'Heebo',sans-serif" }}>{title}</div>
@@ -297,27 +299,27 @@ function LandingPage({ onEnter }) {
 
         {/* כפתור כניסה */}
         <button onClick={onEnter} style={{
-          background:SLATE,
+          background:ACCENT,
           color:"#FFFFFF", border:"none", borderRadius:12,
           padding:"14px 56px", fontSize:16, fontWeight:700,
           cursor:"pointer", fontFamily:"'Heebo',sans-serif",
-          boxShadow:"0 2px 12px rgba(74,127,165,0.3)",
+          boxShadow:"0 2px 10px rgba(45,95,138,0.25)",
           transition:"transform 0.15s, background 0.15s",
           letterSpacing:"0.3px",
         }}
         onMouseEnter={e => {
-          e.currentTarget.style.background=SLATE_L;
+          e.currentTarget.style.background=ACCENT_L;
           e.currentTarget.style.transform="translateY(-2px)";
         }}
         onMouseLeave={e => {
-          e.currentTarget.style.background=SLATE;
+          e.currentTarget.style.background=ACCENT;
           e.currentTarget.style.transform="translateY(0)";
         }}>
           כניסה לפלטפורמה
         </button>
 
         {/* תחתית */}
-        <p style={{ color:"#2A3F55", fontSize:11, textAlign:"center", marginTop:28 }}>
+        <p style={{ color:"#A0AEC0", fontSize:11, textAlign:"center", marginTop:28 }}>
           מיועד למורים המשתתפים במחקר בלבד · פותח כחלק מחיבור תזה אקדמי
         </p>
       </div>
