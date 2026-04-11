@@ -200,121 +200,128 @@ function LandingPage({ onEnter }) {
     { Icon: IconJournal, title: "יומן מורה",           desc: "שאלון שבועי מובנה לתיעוד ורפלקציה, נשלח אוטומטית לחוקר" },
   ];
 
+  /* צבעי Slate-Navy — מקצועי ואקדמי */
+  const NAVY   = "#0B1628";
+  const NAVY2  = "#0F1E38";
+  const NAVY3  = "#132240";
+  const SLATE  = "#4A7FA5";   /* כחול-ציפחה להדגשות */
+  const SLATE_L= "#6B9FC4";
+  const CARD_BG= "#111E35";   /* כרטיסיות אטומות */
+  const CARD_BD= "#1E3352";   /* border כרטיסיות */
+  const TXT_HI = "#E8EEF4";   /* טקסט ראשי */
+  const TXT_LO = "#6B8BA4";   /* טקסט משני */
+
   return (
-    <div style={{
-      direction:"rtl", fontFamily:"'Segoe UI','Arial Hebrew',Arial,sans-serif",
-      minHeight:"100vh", overflowX:"hidden",
-      background:"linear-gradient(145deg, #0D0D1F 0%, #131332 35%, #0F1F4A 70%, #1A0E3A 100%)",
-      display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
-      padding:"48px 24px", boxSizing:"border-box", position:"relative",
-    }}>
+    <>
+      {/* טעינת גופן Heebo */}
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;900&display=swap');`}</style>
 
-      {/* עיגולי רקע דקורטיביים */}
-      <div style={{ position:"absolute", top:"-10%", left:"-5%", width:420, height:420,
-        borderRadius:"50%", background:"radial-gradient(circle, rgba(99,77,255,0.18) 0%, transparent 70%)",
-        pointerEvents:"none" }}/>
-      <div style={{ position:"absolute", bottom:"-8%", right:"-4%", width:320, height:320,
-        borderRadius:"50%", background:"radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)",
-        pointerEvents:"none" }}/>
-
-      {/* לוגו */}
-      <img
-        src="/Untitled%20design.png"
-        alt="הוראה דיפרנציאלית"
-        style={{ width:"clamp(140px,22vw,200px)", marginBottom:20, filter:"drop-shadow(0 4px 24px rgba(129,140,248,0.25))" }}
-      />
-
-      {/* תגית מחקר */}
       <div style={{
-        border:"1px solid rgba(129,140,248,0.4)", borderRadius:24,
-        padding:"4px 18px", marginBottom:36, fontSize:11, letterSpacing:1.2,
-        color:"#818CF8", fontWeight:600, textTransform:"uppercase",
-        background:"rgba(79,70,229,0.12)",
+        direction:"rtl",
+        fontFamily:"'Heebo','Arial Hebrew',Arial,sans-serif",
+        minHeight:"100vh", overflowX:"hidden",
+        background:`linear-gradient(160deg, ${NAVY} 0%, ${NAVY2} 50%, ${NAVY3} 100%)`,
+        display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+        padding:"48px 24px", boxSizing:"border-box",
       }}>
-        מחקר אקדמי · פיילוט 2025–2026
+
+        {/* לוגו */}
+        <img
+          src="/Untitled%20design.png"
+          alt="הוראה דיפרנציאלית"
+          style={{ width:"clamp(130px,18vw,180px)", marginBottom:16 }}
+        />
+
+        {/* תגית מחקר — קטנה ועדינה */}
+        <div style={{
+          border:`1px solid ${CARD_BD}`, borderRadius:20,
+          padding:"3px 14px", marginBottom:28, fontSize:10.5, letterSpacing:1,
+          color:SLATE_L, fontWeight:600, textTransform:"uppercase",
+          background:"rgba(74,127,165,0.08)",
+        }}>
+          מחקר אקדמי · פיילוט 2025–2026
+        </div>
+
+        {/* כותרת ראשית — ללא גרדיאנט, ללא glow */}
+        <h1 style={{
+          margin:"0 0 4px 0", textAlign:"center", lineHeight:1.15,
+          fontSize:"clamp(30px,5.5vw,54px)", fontWeight:900, color:TXT_HI,
+          letterSpacing:"-0.5px", fontFamily:"'Heebo',sans-serif",
+        }}>
+          הוראה דיפרנציאלית
+        </h1>
+        <h1 style={{
+          margin:"0 0 20px 0", textAlign:"center", lineHeight:1.15,
+          fontSize:"clamp(30px,5.5vw,54px)", fontWeight:900,
+          color:SLATE_L,
+          letterSpacing:"-0.5px", fontFamily:"'Heebo',sans-serif",
+        }}>
+          מופעלת על ידי AI
+        </h1>
+
+        {/* תת-כותרת */}
+        <p style={{
+          color:TXT_LO, fontSize:"clamp(14px,1.8vw,16px)", textAlign:"center",
+          margin:"0 0 44px 0", maxWidth:520, lineHeight:1.85, fontWeight:400,
+        }}>
+          כלי AI שתוכנן למורים במקצועות רבי-מלל בחטיבת הביניים ובחטיבה העליונה,
+          לתכנון, בנייה ותיעוד הוראה דיפרנציאלית
+        </p>
+
+        {/* כרטיסי פיצ'רים — אטומות עם border ברור */}
+        <div style={{
+          display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(210px,1fr))",
+          gap:14, width:"100%", maxWidth:900, marginBottom:48,
+        }}>
+          {features.map(({ Icon, title, desc }) => (
+            <div key={title} style={{
+              background:CARD_BG,
+              border:`1px solid ${CARD_BD}`,
+              borderRadius:16, padding:"28px 22px",
+              transition:"transform 0.2s, border-color 0.2s",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform="translateY(-4px)";
+              e.currentTarget.style.borderColor=SLATE;
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform="translateY(0)";
+              e.currentTarget.style.borderColor=CARD_BD;
+            }}>
+              <div style={{ marginBottom:14 }}><Icon/></div>
+              <div style={{ color:TXT_HI, fontWeight:700, fontSize:15, marginBottom:8, fontFamily:"'Heebo',sans-serif" }}>{title}</div>
+              <div style={{ color:TXT_LO, fontSize:13, lineHeight:1.75 }}>{desc}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* כפתור כניסה */}
+        <button onClick={onEnter} style={{
+          background:SLATE,
+          color:"#FFFFFF", border:"none", borderRadius:12,
+          padding:"14px 56px", fontSize:16, fontWeight:700,
+          cursor:"pointer", fontFamily:"'Heebo',sans-serif",
+          boxShadow:"0 2px 12px rgba(74,127,165,0.3)",
+          transition:"transform 0.15s, background 0.15s",
+          letterSpacing:"0.3px",
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.background=SLATE_L;
+          e.currentTarget.style.transform="translateY(-2px)";
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background=SLATE;
+          e.currentTarget.style.transform="translateY(0)";
+        }}>
+          כניסה לפלטפורמה
+        </button>
+
+        {/* תחתית */}
+        <p style={{ color:"#2A3F55", fontSize:11, textAlign:"center", marginTop:28 }}>
+          מיועד למורים המשתתפים במחקר בלבד · פותח כחלק מחיבור תזה אקדמי
+        </p>
       </div>
-
-      {/* כותרת ראשית */}
-      <h1 style={{
-        margin:"0 0 6px 0", textAlign:"center", lineHeight:1.2,
-        fontSize:"clamp(32px,6vw,58px)", fontWeight:900, color:"#FFFFFF",
-        letterSpacing:"-0.5px",
-      }}>
-        הוראה דיפרנציאלית
-      </h1>
-      <h1 style={{
-        margin:"0 0 24px 0", textAlign:"center", lineHeight:1.2,
-        fontSize:"clamp(32px,6vw,58px)", fontWeight:900,
-        background:"linear-gradient(90deg, #818CF8, #C084FC)",
-        WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent",
-        letterSpacing:"-0.5px",
-      }}>
-        מופעלת על ידי AI
-      </h1>
-
-      {/* תת-כותרת */}
-      <p style={{
-        color:"#94A3B8", fontSize:"clamp(14px,2vw,17px)", textAlign:"center",
-        margin:"0 0 52px 0", maxWidth:540, lineHeight:1.8, fontWeight:400,
-      }}>
-        כלי AI שתוכנן למורים במקצועות רבי-מלל בחטיבת הביניים ובחטיבה העליונה,
-        לתכנון, בנייה ותיעוד הוראה דיפרנציאלית
-      </p>
-
-      {/* כרטיסי פיצ'רים */}
-      <div style={{
-        display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(210px,1fr))",
-        gap:14, width:"100%", maxWidth:900, marginBottom:52,
-      }}>
-        {features.map(({ Icon, title, desc }) => (
-          <div key={title} style={{
-            background:"rgba(255,255,255,0.04)",
-            border:"1px solid rgba(129,140,248,0.18)",
-            borderRadius:18, padding:"26px 20px",
-            transition:"transform 0.2s, border-color 0.2s, background 0.2s",
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.transform="translateY(-4px)";
-            e.currentTarget.style.borderColor="rgba(129,140,248,0.55)";
-            e.currentTarget.style.background="rgba(79,70,229,0.14)";
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.transform="translateY(0)";
-            e.currentTarget.style.borderColor="rgba(129,140,248,0.18)";
-            e.currentTarget.style.background="rgba(255,255,255,0.04)";
-          }}>
-            <div style={{ marginBottom:14 }}><Icon/></div>
-            <div style={{ color:"#E2E8F0", fontWeight:700, fontSize:15, marginBottom:8 }}>{title}</div>
-            <div style={{ color:"#64748B", fontSize:13, lineHeight:1.7 }}>{desc}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* כפתור כניסה */}
-      <button onClick={onEnter} style={{
-        background:"linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
-        color:"#FFFFFF", border:"none", borderRadius:14,
-        padding:"15px 60px", fontSize:17, fontWeight:700,
-        cursor:"pointer", fontFamily:"inherit",
-        boxShadow:"0 4px 28px rgba(79,70,229,0.5)",
-        transition:"transform 0.15s, box-shadow 0.15s", letterSpacing:"0.3px",
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.transform="translateY(-2px)";
-        e.currentTarget.style.boxShadow="0 8px 36px rgba(79,70,229,0.7)";
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.transform="translateY(0)";
-        e.currentTarget.style.boxShadow="0 4px 28px rgba(79,70,229,0.5)";
-      }}>
-        כניסה לפלטפורמה
-      </button>
-
-      {/* תחתית */}
-      <p style={{ color:"#334155", fontSize:11, textAlign:"center", marginTop:32 }}>
-        מיועד למורים המשתתפים במחקר בלבד · פותח כחלק מחיבור תזה אקדמי
-      </p>
-    </div>
+    </>
   );
 }
 
