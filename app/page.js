@@ -226,7 +226,7 @@ function LandingPage({ onEnter }) {
 
         {/* לוגו — מוצג טבעי על רקע בהיר */}
         <img
-          src="/LOGO%20TOMER.png"
+          src="/logo.png"
           alt="הוראה דיפרנציאלית"
           style={{ width:"clamp(160px,22vw,220px)", marginBottom:20 }}
         />
