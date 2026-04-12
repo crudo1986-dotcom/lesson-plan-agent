@@ -65,6 +65,7 @@ ${CURRICULUM}
 4. אפס אימוג'ים. אפס ביטויי AI
 5. דקדוק עברי תקני
 6. שאלה אחת בכל פעם
+7. הגהה קפדנית לפני כל פלט: חל איסור מוחלט על שגיאות כתיב, טעויות הקלדה וטעויות דקדוקיות (זכר/נקבה, יחיד/רבים). לפני שתחזיר תשובה — עבור שוב על כל משפט ותקן שגיאות. וודא שאין אותיות כפולות, מילים חסרות, או מילים שאינן קיימות בעברית תקנית.
 ## שאלות סוקרטיות מרכזיות
 "מה התובנה שכל התלמידים צריכים לצאת איתה?"
 "מה בדיוק לא מבינים? קריאה? אוצר מילים? ביטחון?"
@@ -117,6 +118,8 @@ const TASKS_PROMPT = `כל תגובותיך בעברית. כתוב תמיד מי
 - דקדוק עברי תקני מושלם
 - אפס ביטויי AI ("צללו לעומק", "מסע מרתק" — אסור)
 - אפס אימוג'ים בתוך המטלה
+- הגהה קפדנית לפני הפקת הפלט: חל איסור מוחלט על שגיאות כתיב, טעויות הקלדה, וטעויות דקדוקיות (זכר/נקבה, יחיד/רבים). לפני החזרת המטלה, עבור שוב על כל משפט ותקן שגיאות לשוניות. וודא שאין אותיות כפולות, מילים חסרות, או שימוש במילים שאינן קיימות בעברית תקנית.
+- ביקורת עצמית חובה: לפני שליחת הפלט, שאל את עצמך: "האם יש בטקסט זה שגיאת כתיב אחת?" — אם כן, תקן לפני ההחזרה.
 - "תלמיד הזקוק לתמיכה" לא "תלמיד חלש"
 - כרטיס יציאה חובה תמיד
 - הרמות שונות ממשית בסוג החשיבה, לא רק באורך
@@ -159,6 +162,17 @@ async function callAPI(payload) {
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "שגיאת שרת");
   return data.text;
+}
+
+/* Double Pass — הגהה אוטומטית אחרי יצירת מטלה */
+async function proofreadText(draft) {
+  return callAPI({
+    messages: [{
+      role: "user",
+      content: `עבור על הטקסט הבא ותקן שגיאות כתיב, טעויות דקדוקיות (זכר/נקבה, יחיד/רבים) וסימני פיסוק. אל תשנה דבר מלבד שגיאות לשוניות — שמור על המבנה, הפורמט, הכותרות והתוכן בדיוק כפי שהם. החזר אך ורק את הטקסט המתוקן, ללא הסברים:\n\n${draft}`,
+    }],
+    system: "אתה עורך לשוני מדויק בעברית. תפקידך לתקן שגיאות כתיב ודקדוק בלבד — ללא שום שינוי בתוכן, במבנה או בפורמט.",
+  });
 }
 
 const MODES = [
@@ -228,7 +242,7 @@ function LandingPage({ onEnter }) {
         <img
           src="/logo.png"
           alt="הוראה דיפרנציאלית"
-          style={{ width:"clamp(160px,22vw,220px)", marginBottom:20 }}
+          style={{ width:"clamp(220px,30vw,340px)", marginBottom:24 }}
         />
 
         {/* תגית מחקר */}
@@ -358,7 +372,7 @@ export default function App() {
         chips={["אבחון כיתה ומורה","שאלות סוקרטיות","3 מסלולים דיפרנציאליים","מעקב התקדמות"]}
         startLabel="התחל שיחה עם המאמן"/>}
 
-      {mode==="tasks"   && <ChatMode key="tasks"   systemPrompt={TASKS_PROMPT}  senderLabel="בונה מטלות"
+      {mode==="tasks"   && <ChatMode key="tasks"   systemPrompt={TASKS_PROMPT}  senderLabel="בונה מטלות" proofread={true}
         greeting={"שלום! כדי לבנות את המטלה, אשאל כמה שאלות קצרות:\n\n1. מה הנושא, המקצוע והכיתה?\n2. כמה רמות דיפרנציאציה — 1, 2, או 3?\n3. קובץ Word להדפסה, או טקסט בצ'אט?\n4. מה המצב עם חומר הלימוד?\n   א. יש ספר / דף קריאה — בנה מטלה בלי טקסט\n   ב. אין טקסט — צור טקסט לימודי בתוך המסמך\n   ג. יש לי טקסט — אדביק אותו בהודעה הבאה\n5. (אופציונלי) מה מקור השונות בכיתה?"}
         chips={["4 שאלות בלבד","מטלה מוכנה מיד","כרטיס יציאה","עברית תקנית"]}
         startLabel="התחל בניית מטלה"/>}
@@ -381,7 +395,7 @@ export default function App() {
   );
 }
 
-function ChatMode({ systemPrompt, greeting, chips, startLabel, senderLabel }) {
+function ChatMode({ systemPrompt, greeting, chips, startLabel, senderLabel, proofread = false }) {
   // FIX 7: שמירת שיחה ב-localStorage לפי שם הכלי
   const storageKey = `chat_${senderLabel}`;
 
@@ -453,7 +467,11 @@ function ChatMode({ systemPrompt, greeting, chips, startLabel, senderLabel }) {
     setMessages(updated); setInput(""); setLoading(true);
     try {
       const cleanMessages = updated.filter(m => !m.error).map(m => ({ role: m.role, content: m.content }));
-      const reply = await callAPI({ messages: cleanMessages, system: systemPrompt });
+      let reply = await callAPI({ messages: cleanMessages, system: systemPrompt });
+      /* Double Pass — הגהה אוטומטית למטלות מלאות */
+      if (proofread && isTaskComplete(reply)) {
+        try { reply = await proofreadText(reply); } catch { /* אם ההגהה נכשלה — השתמש בטיוטה המקורית */ }
+      }
       setMessages([...updated, { role: "assistant", content: reply }]);
       if (isTaskComplete(reply)) setLastTaskText(reply);
     } catch (e) {
