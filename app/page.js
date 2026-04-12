@@ -408,6 +408,7 @@ function ChatMode({ systemPrompt, greeting, chips, startLabel, senderLabel, proo
 
   const [input, setInput]           = useState("");
   const [loading, setLoading]       = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState("חושב..."); // "חושב..." | "מגיה טקסט..."
   const [wordLoading, setWordLoading] = useState(false);
   const [lastTaskText, setLastTaskText] = useState(null);
   const [copiedIdx, setCopiedIdx]   = useState(null); // FIX 4: מעקב העתקה
@@ -464,21 +465,38 @@ function ChatMode({ systemPrompt, greeting, chips, startLabel, senderLabel, proo
     if (!text.trim() || loading) return;
     const userMsg = { role: "user", content: text };
     const updated = [...messages, userMsg];
-    setMessages(updated); setInput(""); setLoading(true);
+    setMessages(updated); setInput(""); setLoading(true); setLoadingStatus("חושב...");
+
+    /* חיתוך היסטוריה — שולחים לכל היותר 15 הודעות אחרונות */
+    const trimmed = updated.filter(m => !m.error).slice(-15);
+    const cleanMessages = trimmed.map(m => ({ role: m.role, content: m.content }));
+
+    const tryCall = async () => {
+      try { return await callAPI({ messages: cleanMessages, system: systemPrompt }); }
+      catch (e) {
+        const isOverload = e.message.includes("overloaded") || e.message.includes("529");
+        if (isOverload) {
+          await new Promise(r => setTimeout(r, 4000));
+          return await callAPI({ messages: cleanMessages, system: systemPrompt });
+        }
+        throw e;
+      }
+    };
+
     try {
-      const cleanMessages = updated.filter(m => !m.error).map(m => ({ role: m.role, content: m.content }));
-      let reply = await callAPI({ messages: cleanMessages, system: systemPrompt });
+      let reply = await tryCall();
       /* Double Pass — הגהה אוטומטית למטלות מלאות */
       if (proofread && isTaskComplete(reply)) {
+        setLoadingStatus("מגיה טקסט...");
         try { reply = await proofreadText(reply); } catch { /* אם ההגהה נכשלה — השתמש בטיוטה המקורית */ }
       }
       setMessages([...updated, { role: "assistant", content: reply }]);
       if (isTaskComplete(reply)) setLastTaskText(reply);
     } catch (e) {
       const isOverload = e.message.includes("overloaded") || e.message.includes("529");
-      const errMsg = isOverload ? "השרת עמוס כרגע — המתן כמה שניות ונסה שוב." : "משהו השתבש. נסה שוב.";
+      const errMsg = isOverload ? "השרת עמוס כרגע — ניסיתי שוב ולא הצלחתי. המתן כמה שניות ונסה שוב." : "משהו השתבש. נסה שוב.";
       setMessages([...updated, { role: "assistant", content: errMsg, error: true, retryText: text }]);
-    } finally { setLoading(false); }
+    } finally { setLoading(false); setLoadingStatus("חושב..."); }
   };
 
   const start = () => {
@@ -494,7 +512,7 @@ function ChatMode({ systemPrompt, greeting, chips, startLabel, senderLabel, proo
     <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"16px" }}>
       <div style={{ background:WH, borderRadius:18, border:`1px solid ${G200}`,
         padding:"clamp(24px, 5vw, 52px) clamp(20px, 5vw, 48px)", maxWidth:680, width:"100%", textAlign:"center" }}>
-        <img src="/Untitled design.png" alt="לוגו" style={{ height:90, width:"auto", objectFit:"contain", marginBottom:20 }}/>
+        <img src="/logo.png" alt="לוגו" style={{ height:90, width:"auto", objectFit:"contain", marginBottom:20 }}/>
 
         {/* FIX 1: Chips — מציג תכונות הכלי לפני הפעלה */}
         {chips && chips.length > 0 && (
@@ -590,11 +608,14 @@ function ChatMode({ systemPrompt, greeting, chips, startLabel, senderLabel, proo
             <div style={{ display:"flex", justifyContent:"flex-end" }}>
               <div style={{ padding:"13px 17px", borderRadius:"16px 16px 4px 16px", background:WH, border:`1px solid ${G200}` }}>
                 <div style={{ fontSize:11, color:G500, marginBottom:5, fontWeight:600 }}>{senderLabel}</div>
-                <div style={{ display:"flex", gap:4 }}>
-                  {[0, .2, .4].map((d, i) => (
-                    <span key={i} style={{ width:7, height:7, borderRadius:"50%", background:G200,
-                      display:"inline-block", animation:`bounce 1.2s ${d}s infinite` }}/>
-                  ))}
+                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                  <div style={{ display:"flex", gap:4 }}>
+                    {[0, .2, .4].map((d, i) => (
+                      <span key={i} style={{ width:7, height:7, borderRadius:"50%", background:G200,
+                        display:"inline-block", animation:`bounce 1.2s ${d}s infinite` }}/>
+                    ))}
+                  </div>
+                  <span style={{ fontSize:11, color:G500, fontStyle:"italic" }}>{loadingStatus}</span>
                 </div>
               </div>
             </div>
