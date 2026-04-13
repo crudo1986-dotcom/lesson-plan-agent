@@ -740,20 +740,23 @@ ${extras.length ? `דרישות: ${extras.join(", ")}` : ""}
             <ul style={{ margin:0, paddingRight:16, lineHeight:2.2 }}>
               {result.materials.map((m,i) => {
                 const name = typeof m === "object" ? m.name : m;
-                const url  = typeof m === "object" ? m.url  : null;
+                const rawUrl = typeof m === "object" ? m.url : null;
+                /* אם ה-AI לא החזיר URL — ייצר קישור חיפוש בגוגל אוטומטית */
+                const url = (rawUrl && rawUrl.startsWith("http"))
+                  ? rawUrl
+                  : `https://www.google.com/search?q=${encodeURIComponent(name)}`;
                 return (
-                  <li key={i} style={{ fontSize:13, color:G700 }}>
-                    {url ? (
-                      <a href={url} target="_blank" rel="noopener noreferrer"
-                        style={{ color:IND, textDecoration:"none", fontWeight:500,
-                          borderBottom:`1px dashed ${IND}`, paddingBottom:1 }}>
-                        {name}
-                        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style={{ marginRight:4, verticalAlign:"middle" }}>
-                          <path d="M5 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7M7 1h4m0 0v4m0-4L5 7"
-                            stroke={IND} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </a>
-                    ) : name}
+                  <li key={i} style={{ fontSize:13, color:G700, marginBottom:4 }}>
+                    <a href={url} target="_blank" rel="noopener noreferrer"
+                      style={{ color:IND, textDecoration:"none", fontWeight:500,
+                        borderBottom:`1px dashed ${IND}`, paddingBottom:1 }}>
+                      {name}
+                      <svg width="10" height="10" viewBox="0 0 12 12" fill="none"
+                        style={{ marginRight:5, verticalAlign:"middle", opacity:0.7 }}>
+                        <path d="M5 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7M7 1h4m0 0v4m0-4L5 7"
+                          stroke={IND} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </a>
                   </li>
                 );
               })}
