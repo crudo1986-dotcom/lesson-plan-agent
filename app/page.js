@@ -383,6 +383,7 @@ export default function App() {
       {/* FIX 5: Print CSS — מסתיר ניווט ופקדים בעת הדפסה */}
       <style>{`
         @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
         @media print {
           nav { display: none !important; }
           button { display: none !important; }
@@ -606,17 +607,14 @@ function ChatMode({ systemPrompt, greeting, chips, startLabel, senderLabel, proo
 
           {loading && (
             <div style={{ display:"flex", justifyContent:"flex-end" }}>
-              <div style={{ padding:"13px 17px", borderRadius:"16px 16px 4px 16px", background:WH, border:`1px solid ${G200}` }}>
-                <div style={{ fontSize:11, color:G500, marginBottom:5, fontWeight:600 }}>{senderLabel}</div>
-                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                  <div style={{ display:"flex", gap:4 }}>
-                    {[0, .2, .4].map((d, i) => (
-                      <span key={i} style={{ width:7, height:7, borderRadius:"50%", background:G200,
-                        display:"inline-block", animation:`bounce 1.2s ${d}s infinite` }}/>
-                    ))}
-                  </div>
-                  <span style={{ fontSize:11, color:G500, fontStyle:"italic" }}>{loadingStatus}</span>
-                </div>
+              <div style={{ padding:"12px 16px", borderRadius:"16px 16px 4px 16px", background:WH, border:`1px solid ${G200}`,
+                display:"flex", alignItems:"center", gap:10 }}>
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
+                  style={{ animation:"spin 0.9s linear infinite", flexShrink:0 }}>
+                  <circle cx="9" cy="9" r="7" stroke={G200} strokeWidth="2.5"/>
+                  <path d="M9 2 A7 7 0 0 1 16 9" stroke={IND} strokeWidth="2.5" strokeLinecap="round"/>
+                </svg>
+                <span style={{ fontSize:13, color:G700, fontWeight:500 }}>{loadingStatus}</span>
               </div>
             </div>
           )}
