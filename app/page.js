@@ -685,17 +685,28 @@ ${extras.length ? `דרישות: ${extras.join(", ")}` : ""}
   const generate = async () => {
     if (!form.subject || !form.topic || !form.grade) { setError("נא למלא מקצוע, נושא וכיתה"); return; }
     setError(null); setLoading(true); setResult(null);
+    const payload = { messages: [{ role: "user", content: buildPrompt() }], system: "" };
+    const tryGenerate = async () => {
+      try { return await callAPI(payload); }
+      catch (e) {
+        const isOverload = e.message.includes("overloaded") || e.message.includes("529") || e.message.toLowerCase().includes("overload");
+        if (isOverload) {
+          await new Promise(r => setTimeout(r, 5000));
+          return await callAPI(payload);
+        }
+        throw e;
+      }
+    };
     try {
-      // FIX 2: פורמט תקין — messages במקום prompt
-      const text = await callAPI({
-        messages: [{ role: "user", content: buildPrompt() }],
-        system: "",
-      });
+      const text = await tryGenerate();
       const clean = text.replace(/```json|```/g, "").trim();
       const match = clean.match(/\{[\s\S]*\}/);
       if (!match) throw new Error("לא התקבל JSON תקין");
       setResult(JSON.parse(match[0])); setStep("result");
-    } catch (e) { setError(`שגיאה: ${e.message}`); }
+    } catch (e) {
+      const isOverload = e.message.includes("overloaded") || e.message.includes("529") || e.message.toLowerCase().includes("overload");
+      setError(isOverload ? "השרת עמוס כרגע — המתן כ-10 שניות ונסה שוב." : `שגיאה: ${e.message}`);
+    }
     finally { setLoading(false); }
   };
 
