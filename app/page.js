@@ -670,8 +670,16 @@ function BuilderMode() {
 מקצוע: ${form.subject} | נושא: ${form.topic} | כיתה: ${form.grade} | משך: ${form.duration}
 מטרות: ${form.goals || "הגדר לפי הנושא"} | הרכב: ${form.levels}
 ${extras.length ? `דרישות: ${extras.join(", ")}` : ""}
+## חומרים מקוונים
+לכל חומר שתמליץ עליו — הוסף URL אמיתי ומדויק. השתמש באתרים הבאים בעדיפות הזאת:
+1. יד ושם (שואה, היסטוריה): https://www.yadvashem.org/he/education/
+2. דעת — תוכן יהודי: https://www.daat.ac.il/
+3. ויקיפדיה עברית: https://he.wikipedia.org/wiki/[נושא]
+4. YouTube: https://www.youtube.com/results?search_query=[מונח+לחיפוש]
+5. פורטל משרד החינוך: https://edu.gov.il/
+6. אם אין URL ספציפי — צור קישור חיפוש בגוגל: https://www.google.com/search?q=[מונח+לחיפוש]
 החזר JSON בלבד:
-{"title":"...","summary":"...","goals":["..."],"sections":[{"name":"פתיחה","duration":"X דקות","description":"...","activities":["..."]},{"name":"גוף השיעור","duration":"X דקות","description":"...","activities":["..."]},{"name":"סיכום","duration":"X דקות","description":"...","activities":["..."]}],"materials":["..."],"teacherNotes":"..."}`;
+{"title":"...","summary":"...","goals":["..."],"sections":[{"name":"פתיחה","duration":"X דקות","description":"...","activities":["..."]},{"name":"גוף השיעור","duration":"X דקות","description":"...","activities":["..."]},{"name":"סיכום","duration":"X דקות","description":"...","activities":["..."]}],"materials":[{"name":"שם החומר","url":"https://..."}],"teacherNotes":"..."}`;
   };
 
   const generate = async () => {
@@ -718,8 +726,26 @@ ${extras.length ? `דרישות: ${extras.join(", ")}` : ""}
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:12 }}>
         {result.materials?.length > 0 && (
           <BCard title="חומרים" compact>
-            <ul style={{ margin:0, paddingRight:16, lineHeight:2 }}>
-              {result.materials.map((m,i) => <li key={i} style={{ fontSize:13, color:G700 }}>{m}</li>)}
+            <ul style={{ margin:0, paddingRight:16, lineHeight:2.2 }}>
+              {result.materials.map((m,i) => {
+                const name = typeof m === "object" ? m.name : m;
+                const url  = typeof m === "object" ? m.url  : null;
+                return (
+                  <li key={i} style={{ fontSize:13, color:G700 }}>
+                    {url ? (
+                      <a href={url} target="_blank" rel="noopener noreferrer"
+                        style={{ color:IND, textDecoration:"none", fontWeight:500,
+                          borderBottom:`1px dashed ${IND}`, paddingBottom:1 }}>
+                        {name}
+                        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style={{ marginRight:4, verticalAlign:"middle" }}>
+                          <path d="M5 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7M7 1h4m0 0v4m0-4L5 7"
+                            stroke={IND} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </a>
+                    ) : name}
+                  </li>
+                );
+              })}
             </ul>
           </BCard>
         )}
