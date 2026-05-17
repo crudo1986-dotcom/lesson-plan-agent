@@ -66,6 +66,17 @@ ${CURRICULUM}
 5. דקדוק עברי תקני
 6. שאלה אחת בכל פעם
 7. הגהה קפדנית לפני כל פלט: חל איסור מוחלט על שגיאות כתיב, טעויות הקלדה וטעויות דקדוקיות (זכר/נקבה, יחיד/רבים). לפני שתחזיר תשובה — עבור שוב על כל משפט ותקן שגיאות. וודא שאין אותיות כפולות, מילים חסרות, או מילים שאינן קיימות בעברית תקנית.
+## כלל המעבר לפעולה — חובה
+אחרי לא יותר מ-3 חילופי הודעות, אם המורה עדיין לא קיבל פעולה מעשית — הצע יזמית צעד קונקרטי אחד שהוא יכול לנסות כבר מחר. לדוגמה: "על בסיס מה שסיפרת, הצעד הראשון שאני ממליץ עליו הוא: [פעולה ספציפית]. רוצה שנפתח אותו?"
+אם המורה כותב "תן לי פתרון", "מה עושים", "תגיד לי מה לעשות" או ביטויים דומים — עבור מיד להצעת פעולה מעשית, אל תשאל שאלות נוספות.
+## כשמורה מביא חומר שכתב בעצמו — כלל שמירת הסגנון
+אם המורה מדביק טקסט, דף עבודה, או חומר שהוא יצר — שמור במדויק על הסגנון, המינוח, ורמת השפה שלו. אל תכתוב מחדש. רק הוסף, ערוך מינימלית, או צור גרסאות מובדלות שנשמעות כמוהו — לא כמוך.
+## חלוקת חומרים מובדלים בכיתה — כיצד לעשות זאת בצורה שקטה
+כשמורה שואל איך לחלק חומרים מובדלים מבלי להביך תלמידים — הצע את האסטרטגיות הבאות:
+- שיטת "תפקידים": כל תלמיד מקבל תפקיד (בלש, אנליסט, יועץ) — הרמה טמונה בתוכן, לא בשם
+- שיטת "תחנות": כל תחנה עצמאית, תלמידים עוברים בקצב שלהם — אין שיוך גלוי לרמה
+- שיטת "בחירה": "קרא את שלוש האפשרויות ובחר את המאתגרת ביותר עבורך" — הבחירה שקטה
+- שיטת "מעטפה": חומרים מחולקים בשקטיות אישית לפני השיעור — ללא הכרזה
 ## שאלות סוקרטיות מרכזיות
 "מה התובנה שכל התלמידים צריכים לצאת איתה?"
 "מה בדיוק לא מבינים? קריאה? אוצר מילים? ביטחון?"
@@ -367,7 +378,7 @@ export default function App() {
         </div>
       </nav>
 
-      {mode==="mentor"  && <ChatMode key="mentor"  systemPrompt={MENTOR_PROMPT} senderLabel="מאמן פדגוגי"
+      {mode==="mentor"  && <ChatMode key="mentor"  systemPrompt={MENTOR_PROMPT} senderLabel="מאמן פדגוגי" showActionButton={true}
         greeting={"שלום! אני המאמן הפדגוגי שלך.\n\nאני כאן ללוות אותך בבניית הוראה דיפרנציאלית — לא לעשות במקומך, אלא לעזור לך לפתח את החשיבה הפדגוגית שלך.\n\nספר לי על הכיתה שאתה רוצה לעבוד עליה — כמה תלמידים, איזה מקצוע, ומה מרגיש לך הכי מאתגר?"}
         chips={["אבחון כיתה ומורה","שאלות סוקרטיות","3 מסלולים דיפרנציאליים","מעקב התקדמות"]}
         startLabel="התחל שיחה עם המאמן"/>}
@@ -396,7 +407,7 @@ export default function App() {
   );
 }
 
-function ChatMode({ systemPrompt, greeting, chips, startLabel, senderLabel, proofread = false }) {
+function ChatMode({ systemPrompt, greeting, chips, startLabel, senderLabel, proofread = false, showActionButton = false }) {
   // FIX 7: שמירת שיחה ב-localStorage לפי שם הכלי
   const storageKey = `chat_${senderLabel}`;
 
@@ -624,22 +635,35 @@ function ChatMode({ systemPrompt, greeting, chips, startLabel, senderLabel, proo
 
       {/* data-input-bar מאפשר הסתרה מדויקת ב-print */}
       <div data-input-bar style={{ background:WH, borderTop:`1px solid ${G200}`, padding:"12px 18px", flexShrink:0 }}>
-        <div style={{ maxWidth:760, margin:"0 auto", display:"flex", gap:9, alignItems:"flex-end" }}>
-          <textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKey}
-            placeholder="כתבו כאן... (Enter לשליחה)" rows={textareaRows} disabled={loading}
-            style={{ flex:1, resize:"none", padding:"10px 13px", borderRadius:9,
-              border:`1px solid ${input.length>0 ? IND : G200}`, fontSize:14, fontFamily:"inherit",
-              direction:"rtl", outline:"none", lineHeight:1.6, background:"#FAFBFC", color:G900, transition:"all 0.2s" }}/>
-          <button onClick={() => send(input)} disabled={loading || !input.trim()}
-            style={{ width:38, height:38, borderRadius:9, border:"none",
-              background: loading || !input.trim() ? G200 : IND,
-              cursor: loading || !input.trim() ? "default" : "pointer",
-              display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"background 0.15s" }}>
-            <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-              <path d="M13 8H3M8.5 3.5L13 8l-4.5 4.5"
-                stroke={loading || !input.trim() ? "#aaa" : WH} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
+        <div style={{ maxWidth:760, margin:"0 auto", display:"flex", flexDirection:"column", gap:8 }}>
+          {/* כפתור "תן לי פתרון עכשיו" — מופיע רק במאמן פדגוגי אחרי 3 הודעות */}
+          {showActionButton && messages.length >= 6 && (
+            <button onClick={() => send("תן לי פתרון מעשי אחד שאוכל לנסות כבר מחר בכיתה")}
+              disabled={loading}
+              style={{ alignSelf:"flex-end", padding:"7px 16px", borderRadius:8,
+                border:`1.5px solid ${IND}`, background:IND_L, color:IND,
+                fontSize:12, fontWeight:600, cursor: loading ? "default" : "pointer",
+                fontFamily:"inherit", transition:"all 0.15s" }}>
+              תן לי פתרון מעשי עכשיו
+            </button>
+          )}
+          <div style={{ display:"flex", gap:9, alignItems:"flex-end" }}>
+            <textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKey}
+              placeholder="כתבו כאן... (Enter לשליחה)" rows={textareaRows} disabled={loading}
+              style={{ flex:1, resize:"none", padding:"10px 13px", borderRadius:9,
+                border:`1px solid ${input.length>0 ? IND : G200}`, fontSize:14, fontFamily:"inherit",
+                direction:"rtl", outline:"none", lineHeight:1.6, background:"#FAFBFC", color:G900, transition:"all 0.2s" }}/>
+            <button onClick={() => send(input)} disabled={loading || !input.trim()}
+              style={{ width:38, height:38, borderRadius:9, border:"none",
+                background: loading || !input.trim() ? G200 : IND,
+                cursor: loading || !input.trim() ? "default" : "pointer",
+                display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"background 0.15s" }}>
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                <path d="M13 8H3M8.5 3.5L13 8l-4.5 4.5"
+                  stroke={loading || !input.trim() ? "#aaa" : WH} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </>
