@@ -1,6 +1,6 @@
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from "docx";
+
 export const maxDuration = 60;
-import { createRequire } from "module";
 
 function buildDoc(text) {
   const lines = text.split("\n");
@@ -36,7 +36,6 @@ function buildDoc(text) {
 }
 
 function fixRtlXml(xml) {
-  // תיקון pPr
   xml = xml.replace(/<w:pPr>([\s\S]*?)<\/w:pPr>/g, (_, inner) => {
     let f = inner.replace(/<w:bidi\/>/g, "").replace(/<w:jc [^/]*\/>/g, "").trim();
     const bp = f.search(/<w:(?:spacing|ind|rPr)\b/);
@@ -45,11 +44,9 @@ function fixRtlXml(xml) {
     f = jp >= 0 ? f.slice(0, jp) + '<w:jc w:val="right"/>' + f.slice(jp) : f + '<w:jc w:val="right"/>';
     return `<w:pPr>${f}</w:pPr>`;
   });
-  // תיקון rPr
   xml = xml.replace(/<w:rPr>([\s\S]*?)<\/w:rPr>/g, (m, i) =>
     i.includes("<w:rtl/>") ? m : `<w:rPr>${i}<w:rtl/></w:rPr>`
   );
-  // run ללא rPr
   xml = xml.replace(/(<w:r>)(\s*)(<w:t)/g, "$1$2<w:rPr><w:rtl/></w:rPr>$3");
   return xml;
 }
@@ -65,7 +62,9 @@ async function fixRtlBuffer(buffer) {
   return zip.toBuffer();
 }
 
-const { messages, system, prompt, generateWord, rawText, maxTokens } = await req.json();
+export async function POST(req) {
+  const { messages, system, prompt, generateWord, rawText, maxTokens } = await req.json();
+
   if (rawText && generateWord) {
     try {
       const doc = buildDoc(rawText);
@@ -80,7 +79,9 @@ const { messages, system, prompt, generateWord, rawText, maxTokens } = await req
     } catch (e) {
       return Response.json({ error: "שגיאה ביצירת Word: " + e.message }, { status: 500 });
     }
-  }  const apiMessages = messages || [{ role: "user", content: prompt }];
+  }
+
+  const apiMessages = messages || [{ role: "user", content: prompt }];
   const body = { model: "claude-sonnet-4-5", max_tokens: maxTokens || 4000, messages: apiMessages };
   if (system) body.system = system;
 
