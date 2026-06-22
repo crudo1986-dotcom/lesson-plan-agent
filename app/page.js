@@ -694,32 +694,15 @@ function BuilderMode() {
 מקצוע: ${form.subject} | נושא: ${form.topic} | כיתה: ${form.grade} | משך: ${form.duration}
 מטרות: ${form.goals || "הגדר לפי הנושא"} | הרכב: ${form.levels}
 ${extras.length ? `דרישות: ${extras.join(", ")}` : ""}
-## חוק מרכזי — תוכן עשיר בכל שלב
-כל פעילות במערך חייבת לכלול את התוכן הלימודי עצמו, לא רק הנחיות מה לעשות.
-דוגמאות לפי מקצוע:
-- תנ"ך: ציטוט הפסוקים המדויקים הנלמדים בשלב זה (לפי הנוסח המסורתי), הסבר מילות קושי, שאלות לפסוקים ספציפיים
-- היסטוריה: תאריכים מדויקים, שמות דמויות מרכזיות, עובדות היסטוריות, מונחים מרכזיים עם הגדרה
-- ספרות: שורות מהיצירה הנלמדת, שמות דמויות ותפקידן, אמצעים ספרותיים מהטקסט
-- לשון: דוגמאות לשוניות ממשיות, כלל דקדוקי עם דוגמה, תרגיל ממוקד
-- גאוגרפיה: נתונים גיאוגרפיים, שמות מקומות, תופעות ומושגים עם הגדרה
-- אזרחות: סעיפי חוק רלוונטיים, מונחים מרכזיים, דוגמאות מהמציאות הישראלית
-כל activities[] חייב להכיל: תיאור הפעילות + התוכן הלימודי הרלוונטי (פסוק, עובדה, מונח, דוגמה).
-## חומרים מקוונים
-לכל חומר שתמליץ עליו — הוסף URL אמיתי ומדויק. השתמש באתרים הבאים בעדיפות הזאת:
-1. יד ושם (שואה, היסטוריה): https://www.yadvashem.org/he/education/
-2. דעת — תוכן יהודי: https://www.daat.ac.il/
-3. ויקיפדיה עברית: https://he.wikipedia.org/wiki/[נושא]
-4. YouTube: https://www.youtube.com/results?search_query=[מונח+לחיפוש]
-5. פורטל משרד החינוך: https://edu.gov.il/
-6. אם אין URL ספציפי — צור קישור חיפוש בגוגל: https://www.google.com/search?q=[מונח+לחיפוש]
-החזר JSON בלבד:
-{"title":"...","summary":"...","goals":["..."],"sections":[{"name":"פתיחה","duration":"X דקות","description":"...","activities":["תיאור הפעילות + התוכן הלימודי: פסוק/עובדה/מושג ממשי"]},{"name":"גוף השיעור","duration":"X דקות","description":"...","activities":["..."]},{"name":"סיכום","duration":"X דקות","description":"...","activities":["..."]}],"materials":[{"name":"שם החומר","url":"https://..."}],"teacherNotes":"..."}`;
+החזר JSON בלבד בפורמט הבא (ללא טקסט נוסף):
+{"title":"...","summary":"...","goals":["..."],"sections":[{"name":"פתיחה","duration":"X דקות","description":"...","activities":["...","..."]},{"name":"גוף השיעור","duration":"X דקות","description":"...","activities":["...","...","..."]},{"name":"סיכום","duration":"X דקות","description":"...","activities":["...","..."]}],"materials":[{"name":"שם החומר","url":"https://www.google.com/search?q=שם+החומר"}],"teacherNotes":"..."}`;
   };
 
   const generate = async () => {
     if (!form.subject || !form.topic || !form.grade) { setError("נא למלא מקצוע, נושא וכיתה"); return; }
     setError(null); setLoading(true); setResult(null);
-const payload = { messages: [{ role: "user", content: buildPrompt() }], system: "", maxTokens: 3500 };    const tryGenerate = async () => {
+    const payload = { messages: [{ role: "user", content: buildPrompt() }], system: "" };
+    const tryGenerate = async () => {
       try { return await callAPI(payload); }
       catch (e) {
         const isOverload = e.message.includes("overloaded") || e.message.includes("529") || e.message.toLowerCase().includes("overload");
