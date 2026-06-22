@@ -719,7 +719,7 @@ ${extras.length ? `דרישות: ${extras.join(", ")}` : ""}
   const generate = async () => {
     if (!form.subject || !form.topic || !form.grade) { setError("נא למלא מקצוע, נושא וכיתה"); return; }
     setError(null); setLoading(true); setResult(null);
-const payload = { messages: [{ role: "user", content: buildPrompt() }], system: "", maxTokens: 2200 };    const tryGenerate = async () => {
+const payload = { messages: [{ role: "user", content: buildPrompt() }], system: "", maxTokens: 3500 };    const tryGenerate = async () => {
       try { return await callAPI(payload); }
       catch (e) {
         const isOverload = e.message.includes("overloaded") || e.message.includes("529") || e.message.toLowerCase().includes("overload");
