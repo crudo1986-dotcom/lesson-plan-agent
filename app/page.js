@@ -175,6 +175,27 @@ async function callAPI(payload) {
   return data.text;
 }
 
+/* תיקון JSON שה-AI מחזיר עם שגיאות נפוצות */
+function safeParseJSON(raw) {
+  // הסר code blocks
+  let s = raw.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+  // מצא את ה-JSON object
+  const m = s.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  s = m[0];
+  // ניסיון ראשון — JSON תקין
+  try { return JSON.parse(s); } catch (_) {}
+  // תיקון: החלף שורות חדשות בתוך strings בתו escape
+  s = s.replace(/"((?:[^"\\]|\\.)*)"/g, (_, inner) =>
+    '"' + inner.replace(/\r?\n/g, " ").replace(/\t/g, " ") + '"'
+  );
+  try { return JSON.parse(s); } catch (_) {}
+  // תיקון: הסר פסיקים עודפים לפני ] או }
+  s = s.replace(/,\s*([\]}])/g, "$1");
+  try { return JSON.parse(s); } catch (_) {}
+  return null;
+}
+
 /* Double Pass — הגהה אוטומטית אחרי יצירת מטלה */
 async function proofreadText(draft) {
   return callAPI({
@@ -688,14 +709,20 @@ function BuilderMode() {
     if (form.extras.thinking)        extras.push("שאלות חשיבה מסדר גבוה");
     if (form.extras.sel)             extras.push("רכיבים חברתיים-רגשיים");
     if (form.extras.diff_detail)     extras.push("לכל שלב בשיעור (פתיחה, גוף, סיכום) — פרט הנחיות מובדלות: מה עושים תלמידים הזקוקים לתמיכה, מה עושים תלמידים עצמאיים, ומה עושים תלמידים מעמיקים");
-    return `אתה מומחה לפדגוגיה, הוראה מובדלת ותכנון לימודים בישראל.
-כל תוכן שתייצר חייב להתבסס על תוכניות הלימודים הרשמיות של משרד החינוך בלבד — אין להמציא עובדות, פסוקים, תאריכים או מידע שאינו מבוסס על הידע המדויק שלך.
-בנה מערך שיעור מקצועי בעברית:
-מקצוע: ${form.subject} | נושא: ${form.topic} | כיתה: ${form.grade} | משך: ${form.duration}
-מטרות: ${form.goals || "הגדר לפי הנושא"} | הרכב: ${form.levels}
+    return `אתה מומחה לפדגוגיה והוראה מובדלת בישראל. בנה מערך שיעור בעברית.
+מקצוע: ${form.subject} | נושא: ${form.topic} | כיתה: ${form.grade} | משך: ${form.duration} | הרכב: ${form.levels}
+${form.goals ? `מטרות: ${form.goals}` : ""}
 ${extras.length ? `דרישות: ${extras.join(", ")}` : ""}
-החזר JSON בלבד בפורמט הבא (ללא טקסט נוסף):
-{"title":"...","summary":"...","goals":["..."],"sections":[{"name":"פתיחה","duration":"X דקות","description":"...","activities":["...","..."]},{"name":"גוף השיעור","duration":"X דקות","description":"...","activities":["...","...","..."]},{"name":"סיכום","duration":"X דקות","description":"...","activities":["...","..."]}],"materials":[{"name":"שם החומר","url":"https://www.google.com/search?q=שם+החומר"}],"teacherNotes":"..."}`;
+
+חוקים קריטיים לפורמט:
+- החזר JSON בלבד, ללא שום טקסט לפני או אחרי
+- כל string חייב להיות בשורה אחת ללא תו newline בתוכו
+- כל ערך טקסט — קצר וממוקד, עד 120 תווים
+- activities: 2 פעילויות לפתיחה, 3 לגוף, 2 לסיכום
+- materials: עד 3 חומרים בלבד
+
+פורמט מדויק:
+{"title":"כותרת קצרה","summary":"תיאור קצר של השיעור עד 100 תווים","goals":["מטרה 1","מטרה 2","מטרה 3"],"sections":[{"name":"פתיחה","duration":"8 דקות","description":"תיאור קצר","activities":["פעילות ראשונה","פעילות שנייה"]},{"name":"גוף השיעור","duration":"30 דקות","description":"תיאור קצר","activities":["פעילות ראשונה","פעילות שנייה","פעילות שלישית"]},{"name":"סיכום","duration":"7 דקות","description":"תיאור קצר","activities":["פעילות ראשונה","פעילות שנייה"]}],"materials":[{"name":"שם חומר","url":"https://he.wikipedia.org/wiki/נושא"}],"teacherNotes":"הערה קצרה למורה"}`;
   };
 
   const generate = async () => {
@@ -715,10 +742,9 @@ ${extras.length ? `דרישות: ${extras.join(", ")}` : ""}
     };
     try {
       const text = await tryGenerate();
-      const clean = text.replace(/```json|```/g, "").trim();
-      const match = clean.match(/\{[\s\S]*\}/);
-      if (!match) throw new Error("לא התקבל JSON תקין");
-      setResult(JSON.parse(match[0])); setStep("result");
+      const parsed = safeParseJSON(text);
+      if (!parsed) throw new Error("לא התקבל JSON תקין");
+      setResult(parsed); setStep("result");
     } catch (e) {
       const isOverload = e.message.includes("overloaded") || e.message.includes("529") || e.message.toLowerCase().includes("overload");
       setError(isOverload ? "השרת עמוס כרגע — המתן כ-10 שניות ונסה שוב." : `שגיאה: ${e.message}`);
