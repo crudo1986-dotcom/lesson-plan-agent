@@ -1,4 +1,5 @@
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from "docx";
+export const maxDuration = 60;
 import { createRequire } from "module";
 
 function buildDoc(text) {
